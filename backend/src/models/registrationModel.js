@@ -1,12 +1,14 @@
-const mongoose = require("mongoose");
+import mongoose from "mongoose";
 
 const registrationSchema = new mongoose.Schema(
   {
-    user: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
-    event: {
+    // aliases for backward compatibility: `user` -> `student_id`, `event` -> `event_id`
+    student_id: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true, alias: "user" },
+    event_id: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Event",
       required: true,
+      alias: "event",
     },
     status: {
       type: String,
@@ -14,9 +16,12 @@ const registrationSchema = new mongoose.Schema(
       default: "pending",
     },
   },
-  { timestamps: true },
+  {
+    timestamps: { createdAt: "registeredAt", updatedAt: false },
+  },
 );
 
-registrationSchema.index({ user: 1, event: 1 }, { unique: true });
+registrationSchema.index({ student_id: 1, event_id: 1 }, { unique: true });
 
-module.exports = mongoose.model("Registration", registrationSchema);
+export const Registration = mongoose.model("Registration", registrationSchema);
+export default Registration;

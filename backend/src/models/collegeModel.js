@@ -1,15 +1,14 @@
-const mongoose = require("mongoose");
+import mongoose from "mongoose";
 
 const collegeSchema = new mongoose.Schema(
   {
     name: { type: String, required: true },
-    address: String,
-    city: String,
-    state: String,
-    website: String,
-    logoUrl: String,
+    location: { type: String },
+    description: { type: String },
+    logo_url: { type: String },
   },
   { timestamps: true },
 );
 
-module.exports = mongoose.model("College", collegeSchema);
+export const College = mongoose.model("College", collegeSchema);
+export default College;

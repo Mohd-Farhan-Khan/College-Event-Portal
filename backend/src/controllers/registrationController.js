@@ -1,10 +1,10 @@
-const Registration = require("../models/registrationModel");
+import Registration from "../models/registrationModel.js";
 
-exports.registerForEvent = async (req, res, next) => {
+export const registerForEvent = async (req, res, next) => {
   try {
     const registration = await Registration.create({
-      user: req.user._id,
-      event: req.params.eventId,
+      user: req.user._id, // alias -> student_id
+      event: req.params.eventId, // alias -> event_id
     });
     res.status(201).json(registration);
   } catch (err) {
@@ -12,16 +12,18 @@ exports.registerForEvent = async (req, res, next) => {
   }
 };
 
-exports.getRegistrations = async (req, res, next) => {
+export const getRegistrations = async (req, res, next) => {
   try {
     const filter = {};
-    if (req.query.event) filter.event = req.query.event;
-    if (req.query.user) filter.user = req.query.user;
+    if (req.query.event) filter.event_id = req.query.event;
+    if (req.query.user) filter.student_id = req.query.user;
     const regs = await Registration.find(filter)
-      .populate("user", "name")
-      .populate("event", "title");
+      .populate("student_id", "name")
+      .populate("event_id", "title");
     res.json(regs);
   } catch (err) {
     next(err);
   }
 };
+
+export default { registerForEvent, getRegistrations };

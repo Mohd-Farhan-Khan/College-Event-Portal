@@ -1,5 +1,5 @@
-const cloudinary = require("../config/cloudinary");
+import cloudinary from "../config/cloudinary.js";
 const uploadFile = async (filePath, folder = "event-portal") => {
   return cloudinary.uploader.upload(filePath, { folder });
 };
-module.exports = uploadFile;
+export default uploadFile;

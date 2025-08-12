@@ -1,5 +1,5 @@
 // Central error handler
-module.exports = (err, req, res, next) => {
+const errorHandler = (err, req, res, next) => {
   console.error(err);
   const status = err.statusCode || 500;
   res.status(status).json({
@@ -7,3 +7,5 @@ module.exports = (err, req, res, next) => {
     stack: process.env.NODE_ENV === "production" ? undefined : err.stack,
   });
 };
+
+export default errorHandler;

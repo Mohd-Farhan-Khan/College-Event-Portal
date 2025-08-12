@@ -1,20 +1,22 @@
-const User = require("../models/userModel");
+import User from "../models/userModel.js";
 
-exports.getUsers = async (req, res, next) => {
+export const getUsers = async (req, res, next) => {
   try {
-    const users = await User.find().select("-password");
+  const users = await User.find().select("-passwordHash");
     res.json(users);
   } catch (err) {
     next(err);
   }
 };
 
-exports.getUser = async (req, res, next) => {
+export const getUser = async (req, res, next) => {
   try {
-    const user = await User.findById(req.params.id).select("-password");
+  const user = await User.findById(req.params.id).select("-passwordHash");
     if (!user) return res.status(404).json({ message: "User not found" });
     res.json(user);
   } catch (err) {
     next(err);
   }
 };
+
+export default { getUsers, getUser };

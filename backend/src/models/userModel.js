@@ -1,30 +1,33 @@
 import mongoose, { Schema } from "mongoose";
-const bcrypt = require("bcryptjs");
+import bcrypt from "bcryptjs";
 
 const userSchema = new Schema(
   {
-    name: { type: String, required: true },
-    email: { type: String, required: true, unique: true, lowercase: true },
-    password: { type: String, required: true, minlength: 6 },
+    name: { type: String, required: true, trim: true },
+    email: { type: String, required: true, unique: true, lowercase: true, trim: true },
+  // alias allows using `password` in code while persisting `passwordHash` in DB
+  passwordHash: { type: String, required: [true, "Password is required"], minlength: 6, alias: "password" },
     role: {
       type: String,
       enum: ["student", "college", "admin"],
       default: "student",
     },
-    college: { type: mongoose.Schema.Types.ObjectId, ref: "College" },
+  // alias for backward compatibility with `college`
+  college_id: { type: mongoose.Schema.Types.ObjectId, ref: "College", alias: "college" },
   },
   { timestamps: true },
 );
 
 userSchema.pre("save", async function (next) {
-  if (!this.isModified("password")) return next();
+  if (!this.isModified("passwordHash")) return next();
   const salt = await bcrypt.genSalt(10);
-  this.password = await bcrypt.hash(this.password, salt);
+  this.passwordHash = await bcrypt.hash(this.passwordHash, salt);
   next();
 });
 
 userSchema.methods.matchPassword = function (entered) {
-  return bcrypt.compare(entered, this.password);
+  return bcrypt.compare(entered, this.passwordHash);
 };
 
 export const User = mongoose.model("User", userSchema);
+export default User;

@@ -1,13 +1,13 @@
-const Result = require("../models/resultModel");
+import Result from "../models/resultModel.js";
 
-exports.publishResult = async (req, res, next) => {
+export const publishResult = async (req, res, next) => {
   try {
     const { user, position, certificateUrl } = req.body;
     const result = await Result.create({
-      event: req.params.eventId,
-      user,
+      event: req.params.eventId, // alias -> event_id
+      user, // alias -> student_id
       position,
-      certificateUrl,
+      certificateUrl, // alias -> certificate_url
     });
     res.status(201).json(result);
   } catch (err) {
@@ -15,15 +15,17 @@ exports.publishResult = async (req, res, next) => {
   }
 };
 
-exports.getResults = async (req, res, next) => {
+export const getResults = async (req, res, next) => {
   try {
     const filter = {};
-    if (req.query.event) filter.event = req.query.event;
+    if (req.query.event) filter.event_id = req.query.event;
     const results = await Result.find(filter)
-      .populate("user", "name")
-      .populate("event", "title");
+      .populate("student_id", "name")
+      .populate("event_id", "title");
     res.json(results);
   } catch (err) {
     next(err);
   }
 };
+
+export default { publishResult, getResults };

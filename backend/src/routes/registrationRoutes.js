@@ -1,9 +1,9 @@
-const express = require("express");
+import express from "express";
 const router = express.Router({ mergeParams: true });
-const regCtrl = require("../controllers/registrationController");
-const auth = require("../middleware/authMiddleware");
+import regCtrl, { registerForEvent, getRegistrations } from "../controllers/registrationController.js";
+import auth from "../middleware/authMiddleware.js";
 
-router.post("/:eventId", auth("student"), regCtrl.registerForEvent);
-router.get("/", auth(["admin", "college"]), regCtrl.getRegistrations);
+router.post("/:eventId", auth("student"), registerForEvent);
+router.get("/", auth(["admin", "college"]), getRegistrations);
 
-module.exports = router;
+export default router;

@@ -1,8 +1,8 @@
-const { verifyToken } = require("../config/jwt");
-const User = require("../models/userModel");
+import { verifyToken } from "../config/jwt.js";
+import User from "../models/userModel.js";
 
 // Auth + role-based guard
-module.exports = (roles = []) => {
+const auth = (roles = []) => {
   if (typeof roles === "string") roles = [roles];
   return async (req, res, next) => {
     try {
@@ -12,9 +12,9 @@ module.exports = (roles = []) => {
           .status(401)
           .json({ message: "Not authorized, token missing" });
       }
-      const token = authHeader.split(" ")[1];
-      const decoded = verifyToken(token);
-      req.user = await User.findById(decoded.id).select("-password");
+  const token = authHeader.split(" ")[1];
+  const decoded = verifyToken(token);
+  req.user = await User.findById(decoded.id).select("-passwordHash");
       if (!req.user) return res.status(401).json({ message: "User not found" });
       if (roles.length && !roles.includes(req.user.role)) {
         return res
@@ -29,3 +29,5 @@ module.exports = (roles = []) => {
     }
   };
 };
+
+export default auth;

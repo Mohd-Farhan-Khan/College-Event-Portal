@@ -1,6 +1,6 @@
-const Event = require("../models/eventModel");
+import Event from "../models/eventModel.js";
 
-exports.createEvent = async (req, res, next) => {
+export const createEvent = async (req, res, next) => {
   try {
     const event = await Event.create({ ...req.body, createdBy: req.user._id });
     res.status(201).json(event);
@@ -9,19 +9,19 @@ exports.createEvent = async (req, res, next) => {
   }
 };
 
-exports.getEvents = async (req, res, next) => {
+export const getEvents = async (req, res, next) => {
   try {
-    const events = await Event.find().populate("college createdBy", "name");
+  const events = await Event.find().populate("college_id createdBy", "name");
     res.json(events);
   } catch (err) {
     next(err);
   }
 };
 
-exports.getEvent = async (req, res, next) => {
+export const getEvent = async (req, res, next) => {
   try {
     const event = await Event.findById(req.params.id).populate(
-      "college createdBy",
+      "college_id createdBy",
       "name",
     );
     if (!event) return res.status(404).json({ message: "Event not found" });
@@ -30,3 +30,5 @@ exports.getEvent = async (req, res, next) => {
     next(err);
   }
 };
+
+export default { createEvent, getEvents, getEvent };

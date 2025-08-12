@@ -1,2 +1,2 @@
-const { signToken } = require("../config/jwt");
-module.exports = (user) => signToken({ id: user._id, role: user.role });
+import { signToken } from "../config/jwt.js";
+export default (user) => signToken({ id: user._id, role: user.role });
