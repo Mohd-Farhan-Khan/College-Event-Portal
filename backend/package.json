@@ -7,10 +7,11 @@
     "dev": "nodemon src/server.js",
     "start": "node src/server.js",
     "lint": "eslint . --ext .js",
-    "test": "echo 'No tests yet'"
+    "test": "echo 'No tests yet'",
+    "seed:college": "node src/scripts/seedCollege.js"
   },
   "dependencies": {
-    "bcryptjs": "^2.4.3",
+    "bcrypt": "^6.0.0",
     "cloudinary": "^1.41.0",
     "cors": "^2.8.5",
     "dotenv": "^16.6.1",

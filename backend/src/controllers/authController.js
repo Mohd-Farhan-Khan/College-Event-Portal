@@ -3,12 +3,12 @@ import { signToken } from "../config/jwt.js";
 
 export const register = async (req, res, next) => {
   try {
-  const { name, email, password, role, college } = req.body;
+    const { name, email, password, role, college } = req.body;
     const existing = await User.findOne({ email });
     if (existing)
       return res.status(400).json({ message: "Email already registered" });
-  // `password` alias maps to `passwordHash`, and `college` alias maps to `college_id` via schema
-  const user = await User.create({ name, email, password, role, college });
+    // `password` alias maps to `passwordHash`, and `college` alias maps to `college_id` via schema
+    const user = await User.create({ name, email, password, role, college });
     const token = signToken({ id: user._id, role: user.role });
     res
       .status(201)

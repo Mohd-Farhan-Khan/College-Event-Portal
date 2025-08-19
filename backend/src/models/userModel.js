@@ -1,19 +1,19 @@
 import mongoose, { Schema } from "mongoose";
-import bcrypt from "bcryptjs";
+import bcrypt from "bcrypt";
 
 const userSchema = new Schema(
   {
     name: { type: String, required: true, trim: true },
     email: { type: String, required: true, unique: true, lowercase: true, trim: true },
-  // alias allows using `password` in code while persisting `passwordHash` in DB
-  passwordHash: { type: String, required: [true, "Password is required"], minlength: 6, alias: "password" },
+    // alias allows using `password` in code while persisting `passwordHash` in DB
+    passwordHash: { type: String, required: [true, "Password is required"], minlength: 6, alias: "password" },
     role: {
       type: String,
       enum: ["student", "college", "admin"],
       default: "student",
     },
-  // alias for backward compatibility with `college`
-  college_id: { type: mongoose.Schema.Types.ObjectId, ref: "College", alias: "college" },
+    // alias for backward compatibility with `college`
+    college_id: { type: mongoose.Schema.Types.ObjectId, ref: "College", alias: "college" },
   },
   { timestamps: true },
 );
