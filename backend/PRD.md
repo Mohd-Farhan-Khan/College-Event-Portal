@@ -62,6 +62,10 @@ It ensures a seamless experience for **organizers, participants, and administrat
 
 #### 4.1 API Endpoint Structure
 
+**API Documentation**
+- `GET /swagger/index.html` - Interactive Swagger UI documentation
+- `GET /openapi.json` - OpenAPI specification
+
 **Auth Routes** (`/api/auth/`)
 - `POST /register` – Register user
 - `POST /login` – User login
@@ -84,6 +88,7 @@ It ensures a seamless experience for **organizers, participants, and administrat
 - `POST /:eventId` – Register for event (student only)
 - `GET /` – List registrations (college/admin) filters: `event_id`, `student_id`
 - `PATCH /:id` – Update status to `pending|confirmed|cancelled` (college/admin)
+  - Returns 409 Conflict if trying to register for the same event twice
 
 **Result Routes** (`/api/results/`)
 - `POST /` – Upload a result (college/admin)
@@ -141,6 +146,8 @@ It ensures a seamless experience for **organizers, participants, and administrat
 - Secure password storage (bcrypt)
 - File upload validation
 - CORS configuration
+- Proper error handling with relevant HTTP status codes
+- API Documentation via OpenAPI/Swagger
 
 ---
 
@@ -157,3 +164,4 @@ It ensures a seamless experience for **organizers, participants, and administrat
 - Analytics for participation insights
 - Scalable backend with secure authentication
 - Clean, user-friendly frontend with responsive design
+- Interactive API documentation for easy testing and integration

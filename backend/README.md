@@ -9,6 +9,7 @@ Express + MongoDB API for managing colleges, events, registrations, and results.
 - Manage events, registrations, results
 - Cloudinary integration placeholder
 - Certificate generation placeholder
+- Interactive API documentation (Swagger UI)
 
 ## Env Variables (.env)
 
@@ -29,9 +30,22 @@ NODE_ENV=development
 - `npm start` - production start
 - `npm run seed:college -- "<name>" "<location>" "<description>" "<logo_url>"` - seed a college (creates if not exists)
 
+## Getting Started
+
+1. Clone the repository
+2. Install dependencies: `npm install`
+3. Set up environment variables (see `.env` section)
+4. Start the server: `npm run dev`
+5. Access the API documentation: `http://localhost:8000/swagger/index.html`
+
+## API Documentation
+
+Interactive API documentation is available via Swagger UI at:
+- `http://localhost:8000/swagger/index.html`
+
 ## API Overview
 
-- `GET /` health
+- `GET /` health (welcome message)
 - `GET /api/healthcheck`
 
 Auth
@@ -64,11 +78,21 @@ Results
 	- Events: send `posterUrl` or `bannerUrl` (alias/virtual to `poster_url`), send `college` (alias to `college_id`).
 	- Registrations: `user` alias -> `student_id`, `event` alias -> `event_id`.
 	- Results: accept `certificateUrl` (alias -> `certificate_url`); filter by `event_id`/`student_id` or `event`/`user`.
+- Error handling:
+    - Duplicate registrations are handled with a 409 Conflict response
+    - Mongoose validation errors return meaningful messages
+
+## API Documentation Setup
+
+The API documentation is served via Swagger UI:
+- OpenAPI 3.0 specification is at `public/openapi.json`
+- Swagger UI is accessible at `/swagger/index.html`
+- You can authenticate in the UI by providing your JWT token
+- The documentation includes examples for all endpoints
 
 ## TODO
 
 - Add validation (Joi / Zod)
 - Add pagination & filtering
-- Improve error classes
 - Implement file uploads & certificate PDF
 - Add tests
