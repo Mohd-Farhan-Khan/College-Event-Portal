@@ -7,10 +7,10 @@ export const publishResult = async (req, res, next) => {
     if (!eventId) return res.status(400).json({ message: "event_id is required" });
     if (!user && !student_id) return res.status(400).json({ message: "student_id (or user) is required" });
     const result = await Result.create({
-      event: eventId, // alias -> event_id
-      user: user || student_id, // alias -> student_id
+      event_id: eventId,
+      student_id: user || student_id,
       position,
-      certificateUrl: certificateUrl || certificate_url, // alias -> certificate_url
+      certificate_url: certificateUrl || certificate_url,
     });
     res.status(201).json(result);
   } catch (err) {
@@ -21,7 +21,9 @@ export const publishResult = async (req, res, next) => {
 export const getResults = async (req, res, next) => {
   try {
     const filter = {};
-    if (req.query.event) filter.event_id = req.query.event;
+    const { event, event_id, user, student_id } = req.query;
+    if (event || event_id) filter.event_id = event_id || event;
+    if (user || student_id) filter.student_id = student_id || user;
     const results = await Result.find(filter)
       .populate("student_id", "name")
       .populate("event_id", "title");
