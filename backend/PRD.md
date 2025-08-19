@@ -80,14 +80,15 @@ It ensures a seamless experience for **organizers, participants, and administrat
 - `DELETE /:id` – Delete event (college only)
 
 **Registration Routes** (`/api/registrations/`)
+- `POST /` – Register for event (student only) body: `{ event_id }`
 - `POST /:eventId` – Register for event (student only)
-- `GET /myevents` – My registrations (student only)
-- `PUT /:id` – Update status (college only)
+- `GET /` – List registrations (college/admin) filters: `event_id`, `student_id`
+- `PATCH /:id` – Update status to `pending|confirmed|cancelled` (college/admin)
 
 **Result Routes** (`/api/results/`)
-- `POST /:eventId` – Upload results (college/admin)
-- `GET /:eventId` – View event results
-- `GET /my` – View my results (student only)
+- `POST /` – Upload a result (college/admin)
+- `POST /:eventId` – Upload a result for given event (college/admin)
+- `GET /` – Query results with `event_id` and/or `student_id`
 
 **File Upload Routes** (`/api/upload/`)
 - `POST /` – Upload files to Cloudinary (secured)
@@ -101,7 +102,7 @@ It ensures a seamless experience for **organizers, participants, and administrat
 
 | Feature                         | Admin | College | Student |
 |---------------------------------|-------|---------|---------|
-| Create Event                    | ✗     | ✓       | ✗       |
+| Create Event                    | ✓     | ✓       | ✗       |
 | Update/Delete Event             | ✗     | ✓       | ✗       |
 | View Events                     | ✓     | ✓       | ✓       |
 | Register for Event              | ✗     | ✗       | ✓       |
@@ -127,9 +128,9 @@ It ensures a seamless experience for **organizers, participants, and administrat
 - `workshop`
 
 **Registration Status:**
-- `registered`
-- `approved`
-- `rejected`
+- `pending`
+- `confirmed`
+- `cancelled`
 
 ---
 
