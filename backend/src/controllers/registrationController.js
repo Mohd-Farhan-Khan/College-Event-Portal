@@ -6,12 +6,32 @@ export const registerForEvent = async (req, res, next) => {
     if (!eventId) {
       return res.status(400).json({ message: "event_id is required" });
     }
+
+    // Check if registration already exists
+    const existing = await Registration.findOne({
+      student_id: req.user._id,
+      event_id: eventId
+    });
+
+    if (existing) {
+      return res.status(409).json({ 
+        message: "You have already registered for this event",
+        registration: existing
+      });
+    }
+    
     const registration = await Registration.create({
       user: req.user._id, // alias -> student_id
       event: eventId, // alias -> event_id
     });
     res.status(201).json(registration);
   } catch (err) {
+    // Handle duplicate key error more gracefully
+    if (err.code === 11000) {
+      return res.status(409).json({ 
+        message: "You have already registered for this event" 
+      });
+    }
     next(err);
   }
 };

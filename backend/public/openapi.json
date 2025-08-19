@@ -1,0 +1,235 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "College Event Portal API",
+    "version": "1.0.0",
+    "description": "Interactive API docs for the College Event Portal backend."
+  },
+  "servers": [
+    { "url": "/", "description": "Relative (same host)" },
+    { "url": "http://localhost:5000/", "description": "Local dev" }
+  ],
+  "components": {
+    "securitySchemes": {
+      "bearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT"
+      }
+    },
+    "schemas": {
+      "User": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string" },
+          "name": { "type": "string" },
+          "email": { "type": "string", "format": "email" },
+          "role": { "type": "string", "enum": ["student", "college", "admin"] }
+        }
+      },
+      "EventCreate": {
+        "type": "object",
+        "required": ["title", "date"],
+        "properties": {
+          "title": { "type": "string", "example": "Hackathon 2025" },
+          "description": { "type": "string", "example": "Annual coding competition" },
+          "category": { "type": "string", "example": "Technology" },
+          "date": { "type": "string", "format": "date-time", "example": "2025-09-15T10:00:00Z" },
+          "venue": { "type": "string", "example": "Main Auditorium" },
+          "poster_url": { "type": "string", "example": "https://example.com/poster.jpg" },
+          "college_id": { "type": "string", "example": "64a8e5b3c5fe8cfefcf1" }
+        }
+      },
+      "Event": {
+        "type": "object",
+        "properties": {
+          "_id": { "type": "string" },
+          "title": { "type": "string" },
+          "description": { "type": "string" },
+          "category": { "type": "string" },
+          "date": { "type": "string", "format": "date-time" },
+          "venue": { "type": "string" },
+          "poster_url": { "type": "string" },
+          "college_id": { "type": "string" }
+        }
+      },
+      "Registration": {
+        "type": "object",
+        "properties": {
+          "_id": { "type": "string" },
+          "student_id": { "type": "string" },
+          "event_id": { "type": "string" },
+          "status": { "type": "string", "enum": ["pending", "confirmed", "cancelled"] },
+          "registeredAt": { "type": "string", "format": "date-time" }
+        }
+      },
+      "Result": {
+        "type": "object",
+        "properties": {
+          "_id": { "type": "string" },
+          "event_id": { "type": "string" },
+          "student_id": { "type": "string" },
+          "position": { "type": "number" },
+          "certificate_url": { "type": "string" },
+          "issuedAt": { "type": "string", "format": "date-time" }
+        }
+      },
+      "ApiError": {
+        "type": "object",
+        "properties": { "message": { "type": "string" } }
+      }
+    }
+  },
+  "security": [],
+  "paths": {
+    "/": {
+      "get": {
+        "summary": "Root",
+        "responses": { "200": { "description": "Welcome text" } }
+      }
+    },
+    "/api/healthcheck": {
+      "get": {
+        "summary": "Health check",
+        "responses": { "200": { "description": "OK" } }
+      }
+    },
+    "/api/auth/register": {
+      "post": {
+        "summary": "Register user",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["name", "email", "password"],
+                "properties": {
+                  "name": { "type": "string" },
+                  "email": { "type": "string", "format": "email" },
+                  "password": { "type": "string" },
+                  "role": { "type": "string", "enum": ["student", "college", "admin"] },
+                  "college": { "type": "string", "description": "ObjectId of college (alias of college_id)" }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": { "description": "Created", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/User" } } } },
+          "400": { "description": "Bad Request", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ApiError" } } } }
+        }
+      }
+    },
+    "/api/auth/login": {
+      "post": {
+        "summary": "Login",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["email", "password"],
+                "properties": {
+                  "email": { "type": "string", "format": "email" },
+                  "password": { "type": "string" }
+                }
+              }
+            }
+          }
+        },
+        "responses": { "200": { "description": "OK" }, "401": { "description": "Unauthorized" } }
+      }
+    },
+    "/api/auth/me": {
+      "get": {
+        "summary": "Get current user",
+        "security": [{ "bearerAuth": [] }],
+        "responses": { "200": { "description": "OK" }, "401": { "description": "Unauthorized" } }
+      }
+    },
+    "/api/events": {
+      "get": {
+        "summary": "List events",
+        "responses": { "200": { "description": "OK" } }
+      },
+      "post": {
+        "summary": "Create event (college/admin)",
+        "security": [{ "bearerAuth": [] }],
+        "requestBody": {
+          "required": true,
+          "content": { "application/json": { "schema": { "$ref": "#/components/schemas/EventCreate" } } }
+        },
+        "responses": { "201": { "description": "Created" }, "401": { "description": "Unauthorized" }, "403": { "description": "Forbidden" } }
+      }
+    },
+    "/api/events/{id}": {
+      "get": {
+        "summary": "Get event by id",
+        "parameters": [ { "name": "id", "in": "path", "required": true, "schema": { "type": "string" } } ],
+        "responses": { "200": { "description": "OK" }, "404": { "description": "Not Found" } }
+      }
+    },
+    "/api/registrations": {
+      "get": {
+        "summary": "List registrations (filters)",
+        "security": [{ "bearerAuth": [] }],
+        "parameters": [
+          { "name": "student_id", "in": "query", "schema": { "type": "string" } },
+          { "name": "event_id", "in": "query", "schema": { "type": "string" } },
+          { "name": "status", "in": "query", "schema": { "type": "string" } }
+        ],
+        "responses": { "200": { "description": "OK" }, "401": { "description": "Unauthorized" } }
+      },
+      "post": {
+        "summary": "Register for event (from body)",
+        "security": [{ "bearerAuth": [] }],
+        "requestBody": { "required": true, "content": { "application/json": { "schema": { "type": "object", "required": ["event_id"], "properties": { "event_id": { "type": "string" } } } } } },
+        "responses": { "201": { "description": "Created" }, "400": { "description": "Bad Request" }, "401": { "description": "Unauthorized" } }
+      }
+    },
+    "/api/registrations/{eventId}": {
+      "post": {
+        "summary": "Register for event (path)",
+        "security": [{ "bearerAuth": [] }],
+        "parameters": [ { "name": "eventId", "in": "path", "required": true, "schema": { "type": "string" } } ],
+        "responses": { "201": { "description": "Created" }, "400": { "description": "Bad Request" }, "401": { "description": "Unauthorized" } }
+      }
+    },
+    "/api/registrations/{id}": {
+      "patch": {
+        "summary": "Update registration status (college/admin)",
+        "security": [{ "bearerAuth": [] }],
+        "parameters": [ { "name": "id", "in": "path", "required": true, "schema": { "type": "string" } } ],
+        "requestBody": { "required": true, "content": { "application/json": { "schema": { "type": "object", "required": ["status"], "properties": { "status": { "type": "string", "enum": ["pending", "confirmed", "cancelled"] } } } } } },
+        "responses": { "200": { "description": "OK" }, "400": { "description": "Bad Request" }, "401": { "description": "Unauthorized" }, "403": { "description": "Forbidden" } }
+      }
+    },
+    "/api/results": {
+      "get": {
+        "summary": "List results (filters)",
+        "parameters": [
+          { "name": "student_id", "in": "query", "schema": { "type": "string" } },
+          { "name": "event_id", "in": "query", "schema": { "type": "string" } }
+        ],
+        "responses": { "200": { "description": "OK" } }
+      },
+      "post": {
+        "summary": "Publish result (college/admin)",
+        "security": [{ "bearerAuth": [] }],
+        "requestBody": { "required": true, "content": { "application/json": { "schema": { "type": "object", "required": ["event_id", "student_id", "position"], "properties": { "event_id": { "type": "string" }, "student_id": { "type": "string" }, "position": { "type": "number" }, "certificate_url": { "type": "string" } } } } } },
+        "responses": { "201": { "description": "Created" }, "400": { "description": "Bad Request" }, "401": { "description": "Unauthorized" }, "403": { "description": "Forbidden" } }
+      }
+    },
+    "/api/results/{eventId}": {
+      "post": {
+        "summary": "Publish result for event (path)",
+        "security": [{ "bearerAuth": [] }],
+        "parameters": [ { "name": "eventId", "in": "path", "required": true, "schema": { "type": "string" } } ],
+        "requestBody": { "required": true, "content": { "application/json": { "schema": { "type": "object", "required": ["student_id", "position"], "properties": { "student_id": { "type": "string" }, "position": { "type": "number" }, "certificate_url": { "type": "string" } } } } } },
+        "responses": { "201": { "description": "Created" }, "400": { "description": "Bad Request" }, "401": { "description": "Unauthorized" }, "403": { "description": "Forbidden" } }
+      }
+    }
+  }
+}

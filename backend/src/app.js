@@ -27,6 +27,9 @@ app.use(cors({
 import healthCheckRouter from "./routes/healthRoutes.js";
 app.use("/api/healthcheck", healthCheckRouter);
 
+// Swagger UI (static) helper: redirect /swagger -> /swagger/index.html
+app.get("/swagger", (req, res) => res.redirect("/swagger/index.html"));
+
 app.get("/", (req, res) => {
   res.send("Welcome to UniVerse");
 });
