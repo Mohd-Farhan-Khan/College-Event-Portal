@@ -4,13 +4,18 @@ export const createEvent = async (req, res, next) => {
   try {
     // Remove any id or _id fields from the request body to prevent ObjectId cast errors
     const { id, _id, ...eventData } = req.body;
-    
+
+    // College users should only create events for their own college.
+    if (req.user.role === "college") {
+      eventData.college = req.user.college_id;
+    }
+
     // Create the event with the filtered data
-    const event = await Event.create({ 
-      ...eventData, 
-      createdBy: req.user._id 
+    const event = await Event.create({
+      ...eventData,
+      createdBy: req.user._id,
     });
-    
+
     res.status(201).json(event);
   } catch (err) {
     // Log more details for debugging
