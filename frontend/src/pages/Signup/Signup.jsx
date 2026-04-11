@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { ArrowRight, GraduationCap, Building2, ShieldCheck } from 'lucide-react';
 import { Navbar } from '../../components/Navbar/Navbar';
@@ -33,7 +33,7 @@ const ROLES = [
 
 export function Signup() {
   const navigate = useNavigate();
-  const { saveSession } = useAuth();
+  const { user, saveSession } = useAuth();
 
   const [role, setRole] = useState('student');
   const [firstName, setFirstName] = useState('');
@@ -43,6 +43,11 @@ export function Signup() {
   const [collegeId, setCollegeId] = useState('');
   const [error, setError] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  /* Redirect if already logged in */
+  useEffect(() => {
+    if (user) navigate('/events', { replace: true });
+  }, [user, navigate]);
 
   async function handleSubmit(e) {
     e.preventDefault();

@@ -2,6 +2,7 @@ import { Link } from 'react-router-dom';
 import { ArrowRight, Calendar, MapPin, Users, Zap } from 'lucide-react';
 import { Navbar } from '../../components/Navbar/Navbar';
 import { Footer } from '../../components/Footer/Footer';
+import { useAuth } from '../../context/AuthContext';
 
 import eventCultural from '../../assets/event-cultural.png';
 import eventHackathon from '../../assets/event-hackathon.png';
@@ -10,6 +11,8 @@ import eventTalk from '../../assets/event-talk.png';
 import './Home.css';
 
 export function Home() {
+  const { user } = useAuth();
+
   return (
     <div className="home-page">
       <Navbar />
@@ -41,9 +44,11 @@ export function Home() {
                 Explore Events
                 <ArrowRight size={16} className="btn__icon" />
               </Link>
-              <Link to="/login" className="btn btn--outline btn--lg btn--pill" id="hero-signin-btn">
-                Sign In
-              </Link>
+              {!user && (
+                <Link to="/login" className="btn btn--outline btn--lg btn--pill" id="hero-signin-btn">
+                  Sign In
+                </Link>
+              )}
             </div>
           </div>
         </div>
@@ -206,15 +211,23 @@ export function Home() {
       <section className="cta" id="cta-section">
         <div className="cta__inner container">
           <h2 className="cta__title font-serif">
-            Ready to experience <br />campus fully?
+            {user ? 'Discover what\'s next.' : 'Ready to experience'}  {!user && <><br />{'campus fully?'}</>}
           </h2>
           <p className="cta__subtitle">
-            Join thousands of students discovering their next favorite college memory.
+            {user
+              ? 'Browse the latest events and find your next campus experience.'
+              : 'Join thousands of students discovering their next favorite college memory.'}
           </p>
           <div className="cta__action">
-            <Link to="/signup" className="btn btn--gold btn--lg btn--pill" id="cta-signup-btn">
-              Create Student Account
-            </Link>
+            {user ? (
+              <Link to="/events" className="btn btn--gold btn--lg btn--pill" id="cta-events-btn">
+                Browse Events
+              </Link>
+            ) : (
+              <Link to="/signup" className="btn btn--gold btn--lg btn--pill" id="cta-signup-btn">
+                Create Student Account
+              </Link>
+            )}
           </div>
         </div>
       </section>

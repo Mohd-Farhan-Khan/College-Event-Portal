@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { ArrowRight } from 'lucide-react';
 import { Navbar } from '../../components/Navbar/Navbar';
@@ -10,12 +10,17 @@ import './Login.css';
 
 export function Login() {
   const navigate = useNavigate();
-  const { saveSession } = useAuth();
+  const { user, saveSession } = useAuth();
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  /* Redirect if already logged in */
+  useEffect(() => {
+    if (user) navigate('/events', { replace: true });
+  }, [user, navigate]);
 
   async function handleSubmit(e) {
     e.preventDefault();
