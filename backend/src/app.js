@@ -16,8 +16,11 @@ app.use(express.urlencoded({ extended: true, limit: "16kb" })); // To accept URL
 app.use(express.static("public"));
 
 // CORS configuration
+const rawOrigin = process.env.CORS_ORIGIN || "http://localhost:5173";
+const corsOrigin = rawOrigin.trim() === "*" ? true : rawOrigin.split(",").map(o => o.trim());
+
 app.use(cors({
-  origin: process.env.CORS_ORIGIN?.split(",") || "http://localhost:5173",
+  origin: corsOrigin,
   credentials: true,
   methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"],
   allowedHeaders: ["Content-Type", "Authorization"],
