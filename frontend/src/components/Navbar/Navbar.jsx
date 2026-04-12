@@ -15,12 +15,10 @@ export function Navbar() {
     navigate('/');
   }
 
-  /** Determine dashboard link based on role */
-  function getDashboardLink() {
+  /** Determine profile link */
+  function getProfileLink() {
     if (!user) return '/';
-    if (user.role === 'admin') return '/admin/users';
-    if (user.role === 'college') return '/college/events/new';
-    return '/events';
+    return '/me';
   }
 
   return (
@@ -41,7 +39,7 @@ export function Navbar() {
         <div className="navbar__actions">
           {user ? (
             <>
-              <Link to={getDashboardLink()} className="navbar__user-badge" id="nav-user-badge">
+              <Link to={getProfileLink()} className="navbar__user-badge" id="nav-user-badge">
                 <span className="navbar__user-avatar">
                   {user.name?.charAt(0).toUpperCase() || <User size={14} />}
                 </span>
@@ -86,11 +84,11 @@ export function Navbar() {
               {user ? (
                 <>
                   <Link
-                    to={getDashboardLink()}
+                    to={getProfileLink()}
                     className="btn btn--outline btn--full"
                     onClick={() => setIsOpen(false)}
                   >
-                    {user.name}'s Dashboard
+                    {user.name}'s Profile
                   </Link>
                   <button
                     className="btn btn--primary btn--full"
