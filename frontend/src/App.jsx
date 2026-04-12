@@ -6,6 +6,7 @@ import { Signup } from './pages/Signup/Signup';
 import { EventListing } from './pages/EventListing/EventListing';
 import { EventDetail } from './pages/EventDetail/EventDetail';
 import { Profile } from './pages/Profile/Profile';
+import { Results } from './pages/Results/Results';
 
 function App() {
   return (
@@ -18,6 +19,7 @@ function App() {
           <Route path="/events" element={<EventListing />} />
           <Route path="/events/:eventId" element={<EventDetail />} />
           <Route path="/me" element={<Profile />} />
+          <Route path="/results" element={<Results />} />
           {/* Future routes will be added here */}
         </Routes>
       </AuthProvider>
