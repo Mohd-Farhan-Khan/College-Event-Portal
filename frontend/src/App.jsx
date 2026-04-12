@@ -7,6 +7,8 @@ import { EventListing } from './pages/EventListing/EventListing';
 import { EventDetail } from './pages/EventDetail/EventDetail';
 import { Profile } from './pages/Profile/Profile';
 import { Results } from './pages/Results/Results';
+import { CollegeDashboard } from './pages/CollegeDashboard/CollegeDashboard';
+import { CreateEvent } from './pages/CreateEvent/CreateEvent';
 
 function App() {
   return (
@@ -20,6 +22,9 @@ function App() {
           <Route path="/events/:eventId" element={<EventDetail />} />
           <Route path="/me" element={<Profile />} />
           <Route path="/results" element={<Results />} />
+          
+          <Route path="/college/dashboard" element={<CollegeDashboard />} />
+          <Route path="/college/events/new" element={<CreateEvent />} />
           {/* Future routes will be added here */}
         </Routes>
       </AuthProvider>
