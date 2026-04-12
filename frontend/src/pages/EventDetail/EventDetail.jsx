@@ -55,7 +55,7 @@ function getInitials(name = '') {
 export function EventDetail() {
   const { eventId } = useParams();
   const navigate = useNavigate();
-  const { user } = useAuth();
+  const { user, userRegistrations, addRegistration } = useAuth();
 
   const [event, setEvent] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -64,13 +64,6 @@ export function EventDetail() {
   const [isLiked, setIsLiked] = useState(false);
   const [regState, setRegState] = useState('idle'); // idle | loading | registered | error | already
   const [regError, setRegError] = useState('');
-
-  /* Helpers for persisting registration status */
-  const regKey = user ? `reg_${user.id || user._id}_${eventId}` : null;
-
-  function markRegistered() {
-    if (regKey) localStorage.setItem(regKey, '1');
-  }
 
   /* Fetch the event */
   useEffect(() => {
@@ -91,47 +84,12 @@ export function EventDetail() {
     return () => { cancelled = true; };
   }, [eventId]);
 
-  /* Check registration status on mount for logged-in students */
+  /* Sync component state with global registration state on mount/update */
   useEffect(() => {
-    if (!user || user.role !== 'student') return;
-
-    // Quick check: do we have a cached registration?
-    if (regKey && localStorage.getItem(regKey)) {
-      setRegState('already');
-      return;
+    if (userRegistrations?.has(eventId)) {
+      setRegState('already'); // Or keep as 'already' vs 'registered' depending on UI needs
     }
-
-    // Probe the backend — a POST that hits 409 means "already registered"
-    let cancelled = false;
-
-    async function checkRegistration() {
-      try {
-        await request(`/api/registrations/${eventId}`, { method: 'POST' });
-        // If it succeeds, the student just got registered
-        if (!cancelled) {
-          // We don't want auto-registering on page load, so we undo this.
-          // Unfortunately there's no DELETE registration endpoint.
-          // Instead we'll just mark it.
-          setRegState('registered');
-          markRegistered();
-        }
-      } catch (err) {
-        if (err.status === 409 && !cancelled) {
-          setRegState('already');
-          markRegistered();
-        }
-        // Any other error → ignore, user can click Register manually
-      }
-    }
-
-    // Only probe if we haven't already cached registration
-    // Actually, let's NOT auto-probe with POST since it creates a side-effect.
-    // Instead, just rely on localStorage cache. The cache gets set on first
-    // successful registration or 409. This is the safest approach without a
-    // dedicated "check registration" GET endpoint.
-
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [user, eventId, regKey]);
+  }, [userRegistrations, eventId]);
 
   /* Register for event → POST /api/registrations/:eventId */
   async function handleRegister() {
@@ -146,11 +104,11 @@ export function EventDetail() {
     try {
       await request(`/api/registrations/${eventId}`, { method: 'POST' });
       setRegState('registered');
-      markRegistered();
+      addRegistration(eventId);
     } catch (err) {
       if (err.status === 409) {
         setRegState('already');
-        markRegistered();
+        addRegistration(eventId);
       } else {
         setRegState('error');
         setRegError(err.message || 'Registration failed.');

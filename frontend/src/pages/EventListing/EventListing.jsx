@@ -122,7 +122,7 @@ function formatTime(raw) {
 /* ────────────────────────── Component ────────────────────────── */
 
 export function EventListing() {
-  const { user } = useAuth();
+  const { user, userRegistrations } = useAuth();
 
   const [events, setEvents] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -269,8 +269,8 @@ export function EventListing() {
                       <MapPin size={16} /> {featured.venue}
                     </span>
                   </div>
-                  <span className="btn btn--outline-light btn--pill featured-banner__cta">
-                    Register Now
+                  <span className={`btn btn--pill featured-banner__cta ${userRegistrations?.has(featured._id) ? 'btn--primary' : 'btn--outline-light'}`}>
+                    {userRegistrations?.has(featured._id) ? 'Registered ✓' : 'Register Now'}
                   </span>
                 </div>
                 <div className="featured-banner__image-wrap">
@@ -345,9 +345,9 @@ export function EventListing() {
                           <div className="event-card__attendee-dot" />
                           <div className="event-card__attendee-count">+42</div>
                         </div>
-                        <span className="event-card__view-link">
-                          View Details
-                          <ArrowRight size={16} className="event-card__arrow" />
+                        <span className="event-card__view-link" style={userRegistrations?.has(event._id) ? { color: 'var(--cep-primary)', fontWeight: '500' } : {}}>
+                          {userRegistrations?.has(event._id) ? 'Registered ✓' : 'View Details'}
+                          {!userRegistrations?.has(event._id) && <ArrowRight size={16} className="event-card__arrow" />}
                         </span>
                       </div>
                     </div>

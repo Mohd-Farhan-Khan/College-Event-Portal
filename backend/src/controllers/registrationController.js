@@ -66,6 +66,8 @@ export const getRegistrations = async (req, res, next) => {
       } else {
         filter.event_id = { $in: ownedEventIds };
       }
+    } else if (req.user.role === "student") {
+      filter.student_id = req.user._id;
     }
 
     const regs = await Registration.find(filter)

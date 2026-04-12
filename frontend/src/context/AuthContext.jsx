@@ -17,6 +17,7 @@ export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
   const [token, setToken] = useState(() => localStorage.getItem('token'));
   const [isLoading, setIsLoading] = useState(true);
+  const [userRegistrations, setUserRegistrations] = useState(new Set());
 
   /**
    * On mount (or when token changes), try to restore the session
@@ -35,6 +36,21 @@ export function AuthProvider({ children }) {
         const data = await getMe();
         if (!cancelled) {
           setUser(data.user);
+          // If student, fetch their registrations
+          if (data.user.role === 'student') {
+            try {
+              // We need to import request to hit /api/registrations
+              const { request } = await import('../services/api');
+              const regs = await request('/api/registrations');
+              if (!cancelled) {
+                // Store a Set of registered event IDs for O(1) lookup
+                const regSet = new Set(regs.map(r => r.event_id?._id || r.event_id || r.event));
+                setUserRegistrations(regSet);
+              }
+            } catch (err) {
+              console.error('Failed to fetch registrations', err);
+            }
+          }
         }
       } catch {
         // Token expired / invalid — clear it
@@ -42,6 +58,7 @@ export function AuthProvider({ children }) {
           localStorage.removeItem('token');
           setToken(null);
           setUser(null);
+          setUserRegistrations(new Set());
         }
       } finally {
         if (!cancelled) setIsLoading(false);
@@ -59,6 +76,7 @@ export function AuthProvider({ children }) {
     localStorage.setItem('token', newToken);
     setToken(newToken);
     setUser(newUser);
+    // Registrations will be fetched by the useEffect once token changes
   }, []);
 
   /**
@@ -68,10 +86,18 @@ export function AuthProvider({ children }) {
     localStorage.removeItem('token');
     setToken(null);
     setUser(null);
+    setUserRegistrations(new Set());
+  }, []);
+
+  /**
+   * Add a registration (called when a student newly registers for an event)
+   */
+  const addRegistration = useCallback((eventId) => {
+    setUserRegistrations(prev => new Set(prev).add(eventId));
   }, []);
 
   return (
-    <AuthContext.Provider value={{ user, token, isLoading, saveSession, logout }}>
+    <AuthContext.Provider value={{ user, token, isLoading, saveSession, logout, userRegistrations, addRegistration }}>
       {children}
     </AuthContext.Provider>
   );
