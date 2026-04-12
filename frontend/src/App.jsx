@@ -9,6 +9,8 @@ import { Profile } from './pages/Profile/Profile';
 import { Results } from './pages/Results/Results';
 import { CollegeDashboard } from './pages/CollegeDashboard/CollegeDashboard';
 import { CreateEvent } from './pages/CreateEvent/CreateEvent';
+import { ManageRegistrations } from './pages/ManageRegistrations/ManageRegistrations';
+import { PublishResults } from './pages/PublishResults/PublishResults';
 
 function App() {
   return (
@@ -25,6 +27,8 @@ function App() {
           
           <Route path="/college/dashboard" element={<CollegeDashboard />} />
           <Route path="/college/events/new" element={<CreateEvent />} />
+          <Route path="/college/registrations" element={<ManageRegistrations />} />
+          <Route path="/college/results/new" element={<PublishResults />} />
           {/* Future routes will be added here */}
         </Routes>
       </AuthProvider>
