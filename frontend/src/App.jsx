@@ -15,6 +15,8 @@ import { AdminUsersList } from './pages/Admin/AdminUsersList';
 import { AdminUserDetail } from './pages/Admin/AdminUserDetail';
 import { AdminDashboard } from './pages/Admin/AdminDashboard';
 import { AdminCreateEvent } from './pages/Admin/AdminCreateEvent';
+import { AdminRegistrations } from './pages/Admin/AdminRegistrations';
+import { AdminPublishResults } from './pages/Admin/AdminPublishResults';
 
 function App() {
   return (
@@ -38,6 +40,8 @@ function App() {
           <Route path="/admin/users" element={<AdminUsersList />} />
           <Route path="/admin/users/:id" element={<AdminUserDetail />} />
           <Route path="/admin/events/new" element={<AdminCreateEvent />} />
+          <Route path="/admin/registrations" element={<AdminRegistrations />} />
+          <Route path="/admin/results/new" element={<AdminPublishResults />} />
         </Routes>
       </AuthProvider>
     </BrowserRouter>
