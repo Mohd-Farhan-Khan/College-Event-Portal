@@ -13,6 +13,8 @@ import { ManageRegistrations } from './pages/ManageRegistrations/ManageRegistrat
 import { PublishResults } from './pages/PublishResults/PublishResults';
 import { AdminUsersList } from './pages/Admin/AdminUsersList';
 import { AdminUserDetail } from './pages/Admin/AdminUserDetail';
+import { AdminDashboard } from './pages/Admin/AdminDashboard';
+import { AdminCreateEvent } from './pages/Admin/AdminCreateEvent';
 
 function App() {
   return (
@@ -32,8 +34,10 @@ function App() {
           <Route path="/college/registrations" element={<ManageRegistrations />} />
           <Route path="/college/results/new" element={<PublishResults />} />
 
+          <Route path="/admin/dashboard" element={<AdminDashboard />} />
           <Route path="/admin/users" element={<AdminUsersList />} />
           <Route path="/admin/users/:id" element={<AdminUserDetail />} />
+          <Route path="/admin/events/new" element={<AdminCreateEvent />} />
         </Routes>
       </AuthProvider>
     </BrowserRouter>
