@@ -1,5 +1,5 @@
 import { createContext, useContext, useState, useEffect, useCallback } from 'react';
-import { getMe } from '../services/api';
+import { getMe, request } from '../services/api';
 
 const AuthContext = createContext(null);
 
@@ -39,8 +39,6 @@ export function AuthProvider({ children }) {
           // If student, fetch their registrations
           if (data.user.role === 'student') {
             try {
-              // We need to import request to hit /api/registrations
-              const { request } = await import('../services/api');
               const regs = await request('/api/registrations');
               if (!cancelled) {
                 // Store a Set of registered event IDs for O(1) lookup
@@ -106,6 +104,7 @@ export function AuthProvider({ children }) {
 /**
  * Hook to consume auth context.
  */
+// eslint-disable-next-line react-refresh/only-export-components
 export function useAuth() {
   const ctx = useContext(AuthContext);
   if (!ctx) {

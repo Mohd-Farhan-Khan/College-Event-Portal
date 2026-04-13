@@ -4,6 +4,10 @@ import { signToken } from "../config/jwt.js";
 export const register = async (req, res, next) => {
   try {
     const { name, email, password, role, college } = req.body;
+    if (role === "admin") {
+      return res.status(403).json({ message: "Admin accounts cannot be created through public signup" });
+    }
+
     const existing = await User.findOne({ email });
     if (existing)
       return res.status(400).json({ message: "Email already registered" });

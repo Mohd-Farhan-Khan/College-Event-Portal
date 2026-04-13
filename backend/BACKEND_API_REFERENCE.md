@@ -219,7 +219,7 @@ Aliases:
 
 ## API Endpoints
 
-Base URL in local development is typically `http://localhost:5000`.
+Base URL in local development is typically `http://localhost:8000`.
 
 ### Root and docs
 
@@ -300,8 +300,13 @@ Required body:
 
 Optional body fields:
 
-- `role`: `student | college | admin`
+- `role`: `student | college`
 - `college`: college ObjectId alias for `college_id`
+
+Notes:
+
+- Public signup rejects `role: "admin"` with `403`; admin accounts must be provisioned outside this endpoint.
+- For local development, create or update an admin account with `npm run seed:admin -- "<name>" "<email>" "<password>"`.
 
 Success response:
 
@@ -559,7 +564,7 @@ Purpose:
 
 Auth:
 
-- `college` or `admin`
+- `student`, `college`, or `admin`
 
 Supported query params:
 
@@ -573,6 +578,7 @@ Behavior:
 
 - admin can query all registrations
 - college users only see registrations belonging to events they created or events tied to their `college_id`
+- student users only see their own registrations
 - populates:
   - `student_id` with `name`
   - `event_id` with `title`

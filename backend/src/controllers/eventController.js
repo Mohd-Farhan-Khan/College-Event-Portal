@@ -3,7 +3,9 @@ import Event from "../models/eventModel.js";
 export const createEvent = async (req, res, next) => {
   try {
     // Remove any id or _id fields from the request body to prevent ObjectId cast errors
-    const { id, _id, ...eventData } = req.body;
+    const eventData = { ...req.body };
+    delete eventData.id;
+    delete eventData._id;
 
     // College users should only create events for their own college.
     if (req.user.role === "college") {

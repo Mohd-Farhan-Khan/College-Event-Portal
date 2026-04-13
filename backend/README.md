@@ -14,7 +14,7 @@ Express + MongoDB API for managing colleges, events, registrations, and results.
 ## Env Variables (.env)
 
 ```
-PORT=5000
+PORT=8000
 MONGO_URI=mongodb://localhost:27017/college_event_portal
 JWT_SECRET=change_this_secret
 JWT_EXPIRES=7d
@@ -29,14 +29,26 @@ NODE_ENV=development
 - `npm run dev` - start with nodemon
 - `npm start` - production start
 - `npm run seed:college -- "<name>" "<location>" "<description>" "<logo_url>"` - seed a college (creates if not exists)
+- `npm run seed:admin -- "<name>" "<email>" "<password>"` - create or update an admin account for local setup
 
 ## Getting Started
 
 1. Clone the repository
 2. Install dependencies: `npm install`
 3. Set up environment variables (see `.env` section)
-4. Start the server: `npm run dev`
-5. Access the API documentation: `http://localhost:8000/swagger/index.html`
+4. Create the first admin user if needed: `npm run seed:admin -- "Admin User" "admin@example.com" "secret123"`
+5. Start the server: `npm run dev`
+6. Access the API documentation: `http://localhost:8000/swagger/index.html`
+
+## Admin Setup
+
+Public signup intentionally supports only student and college accounts. To create an admin account for local development or a controlled deployment setup, run:
+
+```bash
+npm run seed:admin -- "Admin User" "admin@example.com" "secret123"
+```
+
+The command is idempotent by email. If the user already exists, it updates the name, resets the password, and ensures the role is `admin`. After running it, use the normal login flow with that email and password.
 
 ## API Documentation
 
@@ -49,7 +61,7 @@ Interactive API documentation is available via Swagger UI at:
 - `GET /api/healthcheck`
 
 Auth
-- `POST /api/auth/register`
+- `POST /api/auth/register` (public signup supports student/college only; admin signup is blocked)
 - `POST /api/auth/login`
 - `GET /api/auth/me` (Bearer)
 
@@ -61,7 +73,7 @@ Events
 Registrations
 - `POST /api/registrations` (Bearer; role: student) body: `{ "event_id": "<eventId>" }`
 - `POST /api/registrations/:eventId` (Bearer; role: student)
-- `GET /api/registrations` (Bearer; role: college|admin) query: `event_id`, `student_id`
+- `GET /api/registrations` (Bearer; role: student|college|admin) query: `event_id`, `student_id`
 - `PATCH /api/registrations/:id` (Bearer; role: college|admin) body: `{ "status": "pending|confirmed|cancelled" }`
 
 Results

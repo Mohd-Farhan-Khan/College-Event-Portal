@@ -122,7 +122,7 @@ function formatTime(raw) {
 /* ────────────────────────── Component ────────────────────────── */
 
 export function EventListing() {
-  const { user, userRegistrations } = useAuth();
+  const { userRegistrations } = useAuth();
 
   const [events, setEvents] = useState([]);
   const [isLoading, setIsLoading] = useState(true);

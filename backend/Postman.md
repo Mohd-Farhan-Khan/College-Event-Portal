@@ -47,7 +47,7 @@ npm install
 Check that these are available in `backend/.env`:
 
 ```env
-PORT=5000
+PORT=8000
 MONGO_URI=mongodb://localhost:27017/college_event_portal
 JWT_SECRET=change_this_secret
 JWT_EXPIRES=7d
@@ -82,7 +82,7 @@ You should see a message similar to:
 
 ```bash
 MongoDB Connected
-Server running on port http://localhost:5000
+Server running on port http://localhost:8000
 ```
 
 ### 5. Optional database preparation
@@ -94,6 +94,14 @@ npm run seed:college -- "ABC College" "Mumbai" "Sample college" "https://example
 ```
 
 Save the created college ID because you may need it when registering a `college` user.
+
+Public admin signup is blocked. To test admin endpoints, seed an admin account before logging in:
+
+```bash
+npm run seed:admin -- "Admin User" "admin@example.com" "secret123"
+```
+
+Use the same email and password in the admin login request. The command creates the admin if missing, or updates the existing user with that email to role `admin` and resets the password.
 
 ## Postman Setup
 
@@ -131,7 +139,7 @@ Suggested environment variables:
 
 | Variable | Initial Value | Purpose |
 |---|---|---|
-| `baseUrl` | `http://localhost:5000` | API base URL |
+| `baseUrl` | `http://localhost:8000` | API base URL |
 | `studentEmail` | `student@example.com` | student login email |
 | `studentPassword` | `secret123` | student login password |
 | `collegeEmail` | `college@example.com` | college login email |
@@ -348,11 +356,11 @@ if (json.token) pm.environment.set("collegeToken", json.token);
 if (json.user?.id) pm.environment.set("collegeUserId", json.user.id);
 ```
 
-## Step 5. Register an Admin User
+## Step 5. Verify Public Admin Signup Is Blocked
 
 Create a request:
 
-- Name: `POST Register Admin`
+- Name: `POST Register Admin Blocked`
 - Method: `POST`
 - URL: `{{baseUrl}}/api/auth/register`
 
@@ -375,20 +383,12 @@ Click `Send`.
 
 Expected result:
 
-- Status `201 Created`
+- Status `403 Forbidden`
+- response message says admin accounts cannot be created through public signup
 
-Save:
+Admin setup:
 
-- `adminToken`
-- `adminUserId`
-
-Suggested `Tests` script:
-
-```javascript
-const json = pm.response.json();
-if (json.token) pm.environment.set("adminToken", json.token);
-if (json.user?.id) pm.environment.set("adminUserId", json.user.id);
-```
+- Run `npm run seed:admin -- "Admin User" "admin@example.com" "secret123"`, then use Step 8 to log in and save `adminToken`.
 
 ## Step 6. Login Student
 
@@ -456,7 +456,7 @@ Body:
 }
 ```
 
-Save returned token to `adminToken`.
+Save returned token to `adminToken` and returned user ID to `adminUserId`.
 
 ## Step 9. Test Current User API for Each Role
 
@@ -1034,7 +1034,7 @@ You can organize the collection like this:
 
 - `POST Register Student`
 - `POST Register College`
-- `POST Register Admin`
+- `POST Register Admin Blocked`
 - `POST Login Student`
 - `POST Login College`
 - `POST Login Admin`

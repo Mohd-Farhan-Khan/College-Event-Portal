@@ -1,13 +1,18 @@
 import { useState, useEffect } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
-import { ArrowLeft, Mail, Shield, Hash, Building2, Calendar, Clock, Loader2, AlertCircle } from 'lucide-react';
+import { ArrowLeft, Mail, Shield, Hash, Building2, Calendar, Clock, Loader2, AlertCircle, GraduationCap, ShieldCheck } from 'lucide-react';
 import { Navbar } from '../../components/Navbar/Navbar';
 import { Footer } from '../../components/Footer/Footer';
 import { useAuth } from '../../context/AuthContext';
 import { request } from '../../services/api';
 
-import { ROLE_CONFIG } from './AdminUsersList';
 import './AdminUsersList.css'; // Re-using styles
+
+const ROLE_CONFIG = {
+  student: { label: "Student",  bg: "#DCE8E1", text: "#2F5D50", icon: <GraduationCap size={12} />, desc: "Can browse events and register as a participant." },
+  college: { label: "Organizer",bg: "#F5E4D9", text: "#B56E4A", icon: <Building2 size={12} />, desc: "Can create events, manage registrations, and publish results for their college." },
+  admin:   { label: "Admin",    bg: "#F5F0E4", text: "#C7A86D", icon: <ShieldCheck size={12} />, desc: "Full platform access including user management and global registration control." },
+};
 
 function Field({ icon, label, value, mono = false }) {
   return (
@@ -31,13 +36,15 @@ function formatDate(dateString) {
 
 export function AdminUserDetail() {
   const { id } = useParams();
-  const { user } = useAuth();
+  const { user, isLoading: isAuthLoading } = useAuth();
   const navigate = useNavigate();
 
   const [targetUser, setTargetUser] = useState(null);
   const [viewState, setViewState] = useState("loading"); // "loading" | "loaded" | "error"
 
   useEffect(() => {
+    if (isAuthLoading) return;
+
     if (!user) {
       navigate('/login');
       return;
@@ -66,9 +73,9 @@ export function AdminUserDetail() {
 
     fetchUser();
     return () => { cancelled = true; };
-  }, [id, user, navigate]);
+  }, [id, user, isAuthLoading, navigate]);
 
-  if (!user || user.role !== 'admin') return null;
+  if (isAuthLoading || !user || user.role !== 'admin') return null;
 
   if (viewState === "loading") {
     return (

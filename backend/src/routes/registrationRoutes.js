@@ -1,6 +1,6 @@
 import express from "express";
 const router = express.Router({ mergeParams: true });
-import regCtrl, { registerForEvent, getRegistrations, updateRegistrationStatus } from "../controllers/registrationController.js";
+import { registerForEvent, getRegistrations, updateRegistrationStatus } from "../controllers/registrationController.js";
 import auth from "../middleware/authMiddleware.js";
 
 router.post("/", auth("student"), registerForEvent);

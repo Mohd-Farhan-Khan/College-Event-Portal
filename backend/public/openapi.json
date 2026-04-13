@@ -7,7 +7,7 @@
   },
   "servers": [
     { "url": "/", "description": "Relative (same host)" },
-    { "url": "http://localhost:5000/", "description": "Local dev" }
+    { "url": "http://localhost:8000/", "description": "Local dev" }
   ],
   "components": {
     "securitySchemes": {
@@ -108,7 +108,7 @@
                   "name": { "type": "string" },
                   "email": { "type": "string", "format": "email" },
                   "password": { "type": "string" },
-                  "role": { "type": "string", "enum": ["student", "college", "admin"] },
+                  "role": { "type": "string", "enum": ["student", "college"], "description": "Public signup supports student and college accounts only. Admin accounts are provisioned separately." },
                   "college": { "type": "string", "description": "ObjectId of college (alias of college_id)" }
                 }
               }
@@ -117,7 +117,8 @@
         },
         "responses": {
           "201": { "description": "Created", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/User" } } } },
-          "400": { "description": "Bad Request", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ApiError" } } } }
+          "400": { "description": "Bad Request", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ApiError" } } } },
+          "403": { "description": "Admin signup blocked", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ApiError" } } } }
         }
       }
     },

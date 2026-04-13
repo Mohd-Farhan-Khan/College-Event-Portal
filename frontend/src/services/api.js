@@ -2,7 +2,7 @@
  * API Service
  *
  * Centralised HTTP helper that talks to the backend at
- * http://localhost:5000.  Every request automatically attaches the
+ * http://localhost:8000.  Every request automatically attaches the
  * JWT token (if present) from localStorage.
  */
 

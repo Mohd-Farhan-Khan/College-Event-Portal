@@ -12,7 +12,7 @@ const STATUS_OPTIONS = ["pending", "confirmed", "cancelled"];
 function StatusBadge({ status }) {
   const cfg = {
     confirmed: { bg: "#DCE8E1", text: "#2F5D50", label: "Confirmed" },
-    pending:   { bg: "#F5F0D9", text: "#9A7B3F", label: "Pending"   },
+    pending: { bg: "#F5F0D9", text: "#9A7B3F", label: "Pending" },
     cancelled: { bg: "#F5E4D9", text: "#B56E4A", label: "Cancelled" },
   };
   const c = cfg[status] || { bg: "#F0F0F0", text: "#6B6B6B", label: status };
@@ -51,7 +51,7 @@ function formatDateStr(dateString) {
 }
 
 export function AdminRegistrations() {
-  const { user } = useAuth();
+  const { user, isLoading: isAuthLoading } = useAuth();
   const navigate = useNavigate();
 
   const [regs, setRegs] = useState([]);
@@ -62,11 +62,13 @@ export function AdminRegistrations() {
   const [view, setView] = useState("loading"); // "loading", "loaded", "error"
 
   useEffect(() => {
+    if (isAuthLoading) return;
+
     if (!user) {
       navigate('/login');
       return;
     }
-    if (user.role !== 'admin' && user.role !== 'college') {
+    if (user.role !== 'admin') {
       navigate('/events');
       return;
     }
@@ -92,9 +94,9 @@ export function AdminRegistrations() {
     fetchData();
 
     return () => { cancelled = true; };
-  }, [user, navigate]);
+  }, [user, isAuthLoading, navigate]);
 
-  if (!user || (user.role !== 'admin' && user.role !== 'college')) return null;
+  if (isAuthLoading || !user || user.role !== 'admin') return null;
 
   async function handleStatusChange(id, newStatus) {
     setSaving(id);
@@ -116,14 +118,14 @@ export function AdminRegistrations() {
   // Filter
   const filtered = regs.filter(r => {
     const rEventName = (r.event_id?.title || "").toLowerCase();
-    const rEventId   = r.event_id?._id || r.event_id || "";
+    const rEventId = r.event_id?._id || r.event_id || "";
     const matchEvent = !eventFilter || rEventName.includes(eventFilter.toLowerCase()) || String(rEventId).includes(eventFilter);
 
     const rStudentName = (r.student_id?.name || "").toLowerCase();
-    const rStudentId   = r.student_id?._id || r.student_id || "";
+    const rStudentId = r.student_id?._id || r.student_id || "";
     const matchStudent = !studentFilter || rStudentName.includes(studentFilter.toLowerCase()) || String(rStudentId).includes(studentFilter);
 
-    const matchStatus  = statusFilter === "all" || r.status === statusFilter;
+    const matchStatus = statusFilter === "all" || r.status === statusFilter;
 
     return matchEvent && matchStudent && matchStatus;
   });
@@ -147,7 +149,7 @@ export function AdminRegistrations() {
           <div className="admin-regs-notice">
             <ShieldAlert size={16} color="#C7A86D" style={{ marginTop: '0.125rem', flexShrink: 0 }} />
             <p>
-              You are viewing {user.role === 'admin' ? 'all registrations platform-wide as an admin' : 'registrations for your own events as an organizer'}.
+              You are viewing all registrations platform-wide as an admin.
             </p>
           </div>
 

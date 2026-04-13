@@ -10,7 +10,7 @@ import './CreateEvent.css';
 const CATEGORIES = ["Tech", "Cultural", "Sports", "Academic", "Workshop", "Other"];
 
 export function CreateEvent() {
-  const { user } = useAuth();
+  const { user, isLoading: isAuthLoading } = useAuth();
   const navigate = useNavigate();
 
   const [title, setTitle] = useState("");
@@ -26,14 +26,16 @@ export function CreateEvent() {
 
   // Security check: Must be college or admin to create events
   useEffect(() => {
+    if (isAuthLoading) return;
+
     if (!user) {
       navigate('/login');
     } else if (user.role !== 'college' && user.role !== 'admin') {
       navigate('/events');
     }
-  }, [user, navigate]);
+  }, [user, isAuthLoading, navigate]);
 
-  if (!user || (user.role !== 'college' && user.role !== 'admin')) return null;
+  if (isAuthLoading || !user || (user.role !== 'college' && user.role !== 'admin')) return null;
 
   const hasRequiredFields = title.trim() && date.trim();
 

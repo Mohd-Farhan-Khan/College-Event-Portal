@@ -62,8 +62,12 @@ If the frontend framework has already been chosen, adapt route implementation de
 Backend base URL in local development:
 
 ```text
-http://localhost:5000
+http://localhost:8000
 ```
+
+Note:
+
+- this project intentionally uses port `8000` locally because port `5000` is commonly occupied on macOS development machines
 
 All protected requests must send:
 
@@ -126,12 +130,14 @@ Required request body:
 
 Optional body fields:
 
-- `role`: `student | college | admin`
+- `role`: `student | college`
 - `college`: `collegeObjectId`
 
 Important:
 
 - only pass `college` when creating a `college` role user and you already have a valid college ObjectId
+- public signup must not create `admin` users; admin accounts require administrator provisioning outside the public signup flow
+- for local development, create or update an admin account from the backend with `npm run seed:admin -- "<name>" "<email>" "<password>"`
 - there is no backend endpoint to fetch college options, so a college selection UI is currently `[blocked]` unless college IDs are provided externally
 
 ### Current User
@@ -144,7 +150,7 @@ Use this after login or app refresh to restore the authenticated session.
 
 ## Recommended Frontend Page Map
 
-Build exactly these pages for the currently implemented backend.
+Build these core pages for the currently implemented backend. Treat optional/backlog pages as product decisions, not launch blockers.
 
 ## 1. Public Pages
 
@@ -479,8 +485,8 @@ If populated:
 
 Important limitation:
 
-- there is no dedicated “my registrations” or “my certificates” endpoint
-- a student-only dashboard showing registrations is `[blocked]` because `GET /api/registrations` is restricted to `college` and `admin`
+- there is no dedicated “my certificates” endpoint
+- `GET /api/registrations` is available to students and returns only the logged-in student’s registrations
 
 ### Page 9. Student Dashboard
 
@@ -490,17 +496,18 @@ Route:
 
 Status:
 
-- `[blocked]`
+- `[optional/backlog]`
 
 Reason:
 
-- backend does not expose a student-accessible registrations endpoint
 - backend does not expose a certificate download endpoint
 - backend does not expose student-specific dashboard analytics
+- the current frontend uses `/me`, `/events`, and `/results` for the student experience instead of a separate dashboard route
 
-Allowed temporary scope if product wants a placeholder:
+Allowed scope if product wants this route later:
 
 - show profile summary from `GET /api/auth/me`
+- show the student’s registrations from `GET /api/registrations`
 - link to `/events`
 - link to `/results`
 
@@ -852,7 +859,7 @@ Missing backend support:
 
 ## Page Count Summary
 
-For the currently implemented backend, build these 19 page routes or explicitly ship placeholders for blocked ones:
+For the currently implemented backend, build these core routes. `/student/dashboard` is optional/backlog unless product owners explicitly want a separate student dashboard:
 
 1. `/`
 2. `/login`
@@ -862,7 +869,7 @@ For the currently implemented backend, build these 19 page routes or explicitly 
 6. `/me`
 7. student registration flow inside `/events/:eventId`
 8. `/results`
-9. `/student/dashboard` `[blocked]`
+9. `/student/dashboard` `[optional/backlog]`
 10. `/college/events/new`
 11. `/college/registrations`
 12. `/college/results/new`
@@ -1236,7 +1243,7 @@ Build after all core flows:
 
 - `/college/dashboard`
 - `/admin/dashboard`
-- `/student/dashboard` as blocked placeholder only
+- `/student/dashboard` only if the product wants a separate student dashboard beyond `/me`, `/events`, and `/results`
 
 Why last:
 
@@ -1320,7 +1327,6 @@ These should not be silently invented by frontend code:
 - college picker driven by backend data `[blocked]`
 - event editing `[blocked]`
 - event deletion `[blocked]`
-- student registrations dashboard `[blocked]`
 - certificate downloads `[blocked]`
 - password reset flows `[blocked]`
 - analytics pages `[blocked]`

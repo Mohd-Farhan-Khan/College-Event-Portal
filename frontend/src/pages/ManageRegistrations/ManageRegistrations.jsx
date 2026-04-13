@@ -55,7 +55,7 @@ function formatDate(dateString) {
 }
 
 export function ManageRegistrations() {
-  const { user } = useAuth();
+  const { user, isLoading: isAuthLoading } = useAuth();
   const navigate = useNavigate();
 
   const [regs, setRegs] = useState([]);
@@ -67,6 +67,8 @@ export function ManageRegistrations() {
   const [statusFilter, setStatusFilter] = useState("all");
 
   useEffect(() => {
+    if (isAuthLoading) return;
+
     if (!user) {
       navigate('/login');
       return;
@@ -98,15 +100,13 @@ export function ManageRegistrations() {
 
     fetchRegs();
     return () => { cancelled = true; };
-  }, [user, navigate]);
-
-  if (!user || (user.role !== 'college' && user.role !== 'admin')) return null;
+  }, [user, isAuthLoading, navigate]);
 
   async function handleStatusChange(id, newStatus) {
     setSaving(id);
     try {
       await request(`/api/registrations/${id}`, {
-        method: 'PUT',
+        method: 'PATCH',
         body: { status: newStatus }
       });
       setRegs((prev) => prev.map((r) => (r._id === id ? { ...r, status: newStatus } : r)));
@@ -122,15 +122,17 @@ export function ManageRegistrations() {
     return regs.filter((r) => {
       const eId = r.event_id?._id || '';
       const eTitle = r.event_id?.title || '';
-      
-      const matchEvent = !eventFilter || 
-        eId.includes(eventFilter) || 
+
+      const matchEvent = !eventFilter ||
+        eId.includes(eventFilter) ||
         eTitle.toLowerCase().includes(eventFilter.toLowerCase());
-        
+
       const matchStatus = statusFilter === "all" || r.status === statusFilter;
       return matchEvent && matchStatus;
     });
   }, [regs, eventFilter, statusFilter]);
+
+  if (isAuthLoading || !user || (user.role !== 'college' && user.role !== 'admin')) return null;
 
   return (
     <div className="manage-regs-page">
@@ -138,7 +140,7 @@ export function ManageRegistrations() {
 
       <main className="manage-regs-main">
         <div className="manage-regs-container">
-          
+
           {/* Header */}
           <div className="manage-regs-header">
             <p className="manage-regs-header__eyebrow">College Organizer</p>
@@ -230,10 +232,10 @@ export function ManageRegistrations() {
                         <td><StatusBadge status={r.status} /></td>
                         <td className="regs-td-date">{formatDate(r.registeredAt)}</td>
                         <td>
-                          <StatusSelector 
-                            value={r.status} 
-                            onChange={(v) => handleStatusChange(r._id, v)} 
-                            saving={saving === r._id} 
+                          <StatusSelector
+                            value={r.status}
+                            onChange={(v) => handleStatusChange(r._id, v)}
+                            saving={saving === r._id}
                           />
                         </td>
                       </tr>
@@ -259,10 +261,10 @@ export function ManageRegistrations() {
                     </div>
                     <div style={{ borderTop: '1px solid var(--cep-border)', marginTop: '0.75rem', paddingTop: '0.75rem' }}>
                       <p style={{ fontSize: '0.75rem', fontWeight: 500, color: 'var(--cep-text-secondary)', marginBottom: '0.5rem' }}>Update Status</p>
-                      <StatusSelector 
-                        value={r.status} 
-                        onChange={(v) => handleStatusChange(r._id, v)} 
-                        saving={saving === r._id} 
+                      <StatusSelector
+                        value={r.status}
+                        onChange={(v) => handleStatusChange(r._id, v)}
+                        saving={saving === r._id}
                       />
                     </div>
                   </div>

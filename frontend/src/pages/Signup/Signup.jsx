@@ -1,6 +1,6 @@
-import { useState, useEffect } from 'react';
+import { createElement, useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { ArrowRight, GraduationCap, Building2, ShieldCheck } from 'lucide-react';
+import { ArrowRight, GraduationCap, Building2 } from 'lucide-react';
 import { Navbar } from '../../components/Navbar/Navbar';
 import { Footer } from '../../components/Footer/Footer';
 import { useAuth } from '../../context/AuthContext';
@@ -21,13 +21,6 @@ const ROLES = [
     desc: 'Host events',
     Icon: Building2,
     activeClass: 'role-card--college-active',
-  },
-  {
-    value: 'admin',
-    label: 'Admin',
-    desc: 'Manage college',
-    Icon: ShieldCheck,
-    activeClass: 'role-card--admin-active',
   },
 ];
 
@@ -137,7 +130,7 @@ export function Signup() {
                       onChange={() => setRole(value)}
                       className="sr-only"
                     />
-                    <Icon size={32} className="role-card__icon" />
+                    {createElement(Icon, { size: 32, className: 'role-card__icon' })}
                     <span className="role-card__label">{label}</span>
                     <span className="role-card__desc">{desc}</span>
                   </label>

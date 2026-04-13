@@ -1,6 +1,6 @@
 import express from "express";
 const router = express.Router();
-import eventCtrl, { createEvent, getEvents, getEvent } from "../controllers/eventController.js";
+import { createEvent, getEvents, getEvent } from "../controllers/eventController.js";
 import auth from "../middleware/authMiddleware.js";
 
 router.post("/", auth(["college", "admin"]), createEvent);

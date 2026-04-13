@@ -8,7 +8,7 @@ import { request } from '../../services/api';
 import './AdminPublishResults.css';
 
 export function AdminPublishResults() {
-  const { user } = useAuth();
+  const { user, isLoading: isAuthLoading } = useAuth();
   const navigate = useNavigate();
 
   const [eventId, setEventId] = useState("");
@@ -20,14 +20,16 @@ export function AdminPublishResults() {
   const [newResultId, setNewResultId] = useState("");
 
   useEffect(() => {
+    if (isAuthLoading) return;
+
     if (!user) {
       navigate('/login');
-    } else if (user.role !== 'admin' && user.role !== 'college') {
+    } else if (user.role !== 'admin') {
       navigate('/events');
     }
-  }, [user, navigate]);
+  }, [user, isAuthLoading, navigate]);
 
-  if (!user || (user.role !== 'admin' && user.role !== 'college')) return null;
+  if (isAuthLoading || !user || user.role !== 'admin') return null;
 
   const isValid = eventId.trim() && studentId.trim() && position.trim() && Number(position) > 0;
 
@@ -51,13 +53,13 @@ export function AdminPublishResults() {
 
       setNewResultId(res._id || "Published");
       setSubmitState("success");
-      
+
       // Clear form
       setEventId("");
       setStudentId("");
       setPosition("");
       setCertUrl("");
-      
+
     } catch (err) {
       console.error(err);
       if (err.status === 409) {
@@ -110,7 +112,7 @@ export function AdminPublishResults() {
               <button onClick={() => setSubmitState("idle")} className="admin-publish-banner-close admin-publish-banner-close--conflict">&times;</button>
             </div>
           )}
-          
+
           {/* General Error Banner */}
           {submitState === "error" && (
             <div className="admin-publish-banner admin-publish-banner--conflict">

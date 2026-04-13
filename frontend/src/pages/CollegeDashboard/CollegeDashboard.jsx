@@ -59,7 +59,7 @@ function formatDate(dateString) {
 }
 
 export function CollegeDashboard() {
-  const { user } = useAuth();
+  const { user, isLoading: isAuthLoading } = useAuth();
   const navigate = useNavigate();
 
   const [registrations, setRegistrations] = useState([]);
@@ -67,6 +67,8 @@ export function CollegeDashboard() {
   const [error, setError] = useState('');
 
   useEffect(() => {
+    if (isAuthLoading) return;
+
     // If not logged in as college, redirect early
     if (!user) {
       navigate('/login');
@@ -99,9 +101,9 @@ export function CollegeDashboard() {
 
     loadStats();
     return () => { cancelled = true; };
-  }, [user, navigate]);
+  }, [user, isAuthLoading, navigate]);
 
-  if (!user || user.role !== 'college') return null; // Let the useEffect handle the redirect safely
+  if (isAuthLoading || !user || user.role !== 'college') return null; // Let the useEffect handle the redirect safely
 
   const total = registrations.length;
   const confirmed = registrations.filter((r) => r.status === 'confirmed').length;

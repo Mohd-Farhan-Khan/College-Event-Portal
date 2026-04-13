@@ -11,7 +11,7 @@ import '../CreateEvent/CreateEvent.css'; // Re-use event form CSS
 const CATEGORIES = ["Tech", "Cultural", "Sports", "Academic", "Workshop", "Other"];
 
 export function AdminCreateEvent() {
-  const { user } = useAuth();
+  const { user, isLoading: isAuthLoading } = useAuth();
   const navigate = useNavigate();
 
   const [title, setTitle] = useState("");
@@ -27,14 +27,16 @@ export function AdminCreateEvent() {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
+    if (isAuthLoading) return;
+
     if (!user) {
       navigate('/login');
     } else if (user.role !== 'admin') {
       navigate('/events');
     }
-  }, [user, navigate]);
+  }, [user, isAuthLoading, navigate]);
 
-  if (!user || user.role !== 'admin') return null;
+  if (isAuthLoading || !user || user.role !== 'admin') return null;
 
   const isValid = title.trim() && date.trim();
 

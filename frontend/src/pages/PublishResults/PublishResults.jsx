@@ -10,7 +10,7 @@ import '../CreateEvent/CreateEvent.css'; // Re-use select structural classes lik
 import './PublishResults.css';
 
 export function PublishResults() {
-  const { user } = useAuth();
+  const { user, isLoading: isAuthLoading } = useAuth();
   const navigate = useNavigate();
 
   const [eventId, setEventId] = useState("");
@@ -23,14 +23,16 @@ export function PublishResults() {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
+    if (isAuthLoading) return;
+
     if (!user) {
       navigate('/login');
     } else if (user.role !== 'college' && user.role !== 'admin') {
       navigate('/events');
     }
-  }, [user, navigate]);
+  }, [user, isAuthLoading, navigate]);
 
-  if (!user || (user.role !== 'college' && user.role !== 'admin')) return null;
+  if (isAuthLoading || !user || (user.role !== 'college' && user.role !== 'admin')) return null;
 
   const isValid = eventId.trim() && studentId.trim() && position.trim() && Number(position) > 0;
 

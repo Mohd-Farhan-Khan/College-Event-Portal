@@ -8,7 +8,8 @@
     "start": "node src/server.js",
     "lint": "eslint . --ext .js",
     "test": "echo 'No tests yet'",
-    "seed:college": "node src/scripts/seedCollege.js"
+    "seed:college": "node src/scripts/seedCollege.js",
+    "seed:admin": "node src/scripts/seedAdmin.js"
   },
   "dependencies": {
     "bcrypt": "^6.0.0",

@@ -7,7 +7,7 @@ import { useAuth } from '../../context/AuthContext';
 import { request } from '../../services/api';
 import './AdminUsersList.css';
 
-export const ROLE_CONFIG = {
+const ROLE_CONFIG = {
   student: { label: "Student",  bg: "#DCE8E1", text: "#2F5D50", icon: <GraduationCap size={12} />, desc: "Can browse events and register as a participant." },
   college: { label: "Organizer",bg: "#F5E4D9", text: "#B56E4A", icon: <Building2 size={12} />, desc: "Can create events, manage registrations, and publish results for their college." },
   admin:   { label: "Admin",    bg: "#F5F0E4", text: "#C7A86D", icon: <ShieldCheck size={12} />, desc: "Full platform access including user management and global registration control." },
@@ -30,7 +30,7 @@ function formatDate(dateString) {
 }
 
 export function AdminUsersList() {
-  const { user } = useAuth();
+  const { user, isLoading: isAuthLoading } = useAuth();
   const navigate = useNavigate();
 
   const [query, setQuery] = useState("");
@@ -38,6 +38,8 @@ export function AdminUsersList() {
   const [viewState, setViewState] = useState("loading"); // "loading" | "loaded" | "error" | "empty"
 
   useEffect(() => {
+    if (isAuthLoading) return;
+
     if (!user) {
       navigate('/login');
       return;
@@ -67,9 +69,9 @@ export function AdminUsersList() {
 
     fetchUsers();
     return () => { cancelled = true; };
-  }, [user, navigate]);
+  }, [user, isAuthLoading, navigate]);
 
-  if (!user || user.role !== 'admin') return null;
+  if (isAuthLoading || !user || user.role !== 'admin') return null;
 
   const filtered = usersList.filter(u => {
     if (!query) return true;

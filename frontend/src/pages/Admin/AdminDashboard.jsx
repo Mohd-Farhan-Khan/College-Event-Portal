@@ -41,7 +41,7 @@ function formatDateMin(dateString) {
 }
 
 export function AdminDashboard() {
-  const { user } = useAuth();
+  const { user, isLoading: isAuthLoading } = useAuth();
   const navigate = useNavigate();
 
   const [data, setData] = useState({
@@ -53,6 +53,8 @@ export function AdminDashboard() {
   const [viewState, setViewState] = useState("loading"); // "loading", "loaded", "error"
 
   useEffect(() => {
+    if (isAuthLoading) return;
+
     if (!user) {
       navigate('/login');
       return;
@@ -97,9 +99,9 @@ export function AdminDashboard() {
 
     loadDashboardData();
     return () => { cancelled = true; };
-  }, [user, navigate]);
+  }, [user, isAuthLoading, navigate]);
 
-  if (!user || user.role !== 'admin') return null;
+  if (isAuthLoading || !user || user.role !== 'admin') return null;
 
   if (viewState === "loading") {
     return (
