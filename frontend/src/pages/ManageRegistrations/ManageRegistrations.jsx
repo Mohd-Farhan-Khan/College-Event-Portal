@@ -207,7 +207,7 @@ export function ManageRegistrations() {
           ) : (
             <>
               {/* Desktop Table (Re-use regs-wrap from dashboard) */}
-              <div className="regs-wrap hidden sm:block">
+              <div className="regs-wrap manage-regs-table-wrap">
                 <table className="regs-table" style={{ display: 'table' }}>
                   <thead>
                     <tr>
@@ -245,7 +245,7 @@ export function ManageRegistrations() {
               </div>
 
               {/* Mobile Cards */}
-              <div className="regs-mobile-list sm:hidden" style={{ display: 'flex', gap: '0.75rem' }}>
+              <div className="regs-mobile-list">
                 {filtered.map((r) => (
                   <div key={r._id} className="regs-mobile-card" style={{ border: '1px solid var(--cep-border)', borderRadius: '1rem', backgroundColor: 'var(--cep-surface)', boxShadow: '0 1px 2px rgba(0,0,0,0.05)' }}>
                     <div className="regs-mobile-card-row" style={{ alignItems: 'flex-start', marginBottom: '0.25rem' }}>

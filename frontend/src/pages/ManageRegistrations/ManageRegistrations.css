@@ -139,6 +139,26 @@
   color: var(--cep-text-primary);
 }
 
+.manage-regs-table-wrap {
+  display: none;
+}
+
+.regs-mobile-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+@media (min-width: 640px) {
+  .manage-regs-table-wrap {
+    display: block;
+  }
+
+  .regs-mobile-list {
+    display: none;
+  }
+}
+
 /* Status Selector (Inside Table/Cards) */
 .status-selector {
   position: relative;
