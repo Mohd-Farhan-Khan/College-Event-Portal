@@ -28,6 +28,9 @@ You can test these route groups:
 - Events
 - Registrations
 - Results
+- Uploads
+- Colleges
+- Analytics
 - Swagger / OpenAPI static docs
 
 ## Before Opening Postman
@@ -124,7 +127,10 @@ Recommended folders inside the collection:
 - `04 Events`
 - `05 Registrations`
 - `06 Results`
-- `07 Negative Tests`
+- `07 Uploads`
+- `08 Colleges`
+- `09 Analytics`
+- `10 Negative Tests`
 
 ## 2. Create an Environment
 
@@ -155,7 +161,9 @@ Suggested environment variables:
 | `adminUserId` |  | saved after register/login |
 | `eventId` |  | saved after event creation |
 | `registrationId` |  | saved after registration |
-| `resultId` |  | optional |
+| `resultId` |  | saved after result publish |
+| `uploadedFileUrl` |  | saved after upload |
+| `collegeRecordId` |  | saved after college CRUD tests |
 
 5. Click `Save`.
 6. At the top-right of Postman, select the environment `College Event Portal Local`.
@@ -207,9 +215,13 @@ Follow this order:
 10. Read registrations
 11. Update registration status
 12. Publish results
-13. Read results
-14. Test error and permission cases
-15. Check Swagger and OpenAPI routes
+13. Generate/download certificates
+14. Test upload endpoint
+15. Test college CRUD and management routes
+16. Test analytics routes
+17. Read results
+18. Test error and permission cases
+19. Check Swagger and OpenAPI routes
 
 This order matters because later requests need IDs and tokens from earlier requests.
 
@@ -604,6 +616,35 @@ Expected:
 
 - Status `200 OK`
 
+### 12C. Update event as college owner
+
+Create request:
+
+- Name: `PUT Update Event`
+- Method: `PUT`
+- URL: `{{baseUrl}}/api/events/{{eventId}}`
+
+Select:
+
+- `Authorization` -> `Bearer Token`
+- Token: `{{collegeToken}}`
+- `Body` -> `raw` -> `JSON`
+
+Body:
+
+```json
+{
+  "title": "Hackathon 2026 - Updated",
+  "venue": "Innovation Hall",
+  "posterUrl": "https://example.com/poster-updated.jpg"
+}
+```
+
+Expected:
+
+- Status `200 OK`
+- updated event returned
+
 ## Step 13. Register a Student for an Event
 
 ### 13A. Register using request body
@@ -852,6 +893,205 @@ Use:
 - `Params` tab:
   - `student_id` = `{{studentUserId}}`
 
+## Step 17A. Generate and Download Certificates
+
+### 17A. Generate certificate for a result
+
+Create request:
+
+- Name: `POST Generate Certificate`
+- Method: `POST`
+- URL: `{{baseUrl}}/api/results/{{resultId}}/certificate`
+
+Select:
+
+- `Authorization` -> `Bearer Token`
+- Token: `{{collegeToken}}`
+
+Expected:
+
+- `200 OK`
+- updated result returned
+- `certificate_url` should point to the protected backend download route
+
+### 17B. Download certificate as student
+
+- Method: `GET`
+- URL: `{{baseUrl}}/api/results/{{resultId}}/certificate`
+- `Authorization` -> `Bearer Token`
+- Token: `{{studentToken}}`
+
+Expected:
+
+- `200 OK`
+- file download response
+
+### 17C. Download certificate as admin
+
+- Method: `GET`
+- URL: `{{baseUrl}}/api/results/{{resultId}}/certificate`
+- `Authorization` -> `Bearer Token`
+- Token: `{{adminToken}}`
+
+Expected:
+
+- `200 OK`
+
+## Step 17B. Test Upload Endpoint
+
+Create request:
+
+- Name: `POST Upload File`
+- Method: `POST`
+- URL: `{{baseUrl}}/api/upload`
+
+Select:
+
+- `Authorization` -> `Bearer Token`
+- Token: `{{adminToken}}` or `{{collegeToken}}`
+- `Body` -> `form-data`
+
+Add form-data fields:
+
+- key: `file`
+  - type: `File`
+  - choose an image or PDF from your machine
+- key: `kind`
+  - type: `Text`
+  - value: `poster`
+
+Expected:
+
+- `201 Created`
+- JSON with:
+  - `url`
+  - `publicId`
+  - `filename`
+  - `mimeType`
+  - `size`
+  - `storage`
+
+Suggested `Tests` script:
+
+```javascript
+const json = pm.response.json();
+if (json.url) pm.environment.set("uploadedFileUrl", json.url);
+```
+
+## Step 17C. Test College CRUD and Management Routes
+
+### 17C. Create college as admin
+
+- Method: `POST`
+- URL: `{{baseUrl}}/api/colleges`
+- Token: `{{adminToken}}`
+- Body:
+
+```json
+{
+  "name": "XYZ Institute",
+  "location": "Pune",
+  "description": "Test college created from Postman",
+  "logo_url": "{{uploadedFileUrl}}"
+}
+```
+
+Expected:
+
+- `201 Created`
+
+Suggested `Tests` script:
+
+```javascript
+const json = pm.response.json();
+if (json._id) pm.environment.set("collegeRecordId", json._id);
+```
+
+### 17D. List colleges
+
+- Method: `GET`
+- URL: `{{baseUrl}}/api/colleges`
+- No auth required
+
+### 17E. Get college by ID
+
+- Method: `GET`
+- URL: `{{baseUrl}}/api/colleges/{{collegeRecordId}}`
+
+### 17F. Update college as admin
+
+- Method: `PUT`
+- URL: `{{baseUrl}}/api/colleges/{{collegeRecordId}}`
+- Token: `{{adminToken}}`
+- Body:
+
+```json
+{
+  "location": "Mumbai",
+  "description": "Updated from Postman"
+}
+```
+
+### 17G. Get college events
+
+- Method: `GET`
+- URL: `{{baseUrl}}/api/colleges/{{collegeRecordId}}/events`
+
+### 17H. Get college users as admin
+
+- Method: `GET`
+- URL: `{{baseUrl}}/api/colleges/{{collegeRecordId}}/users`
+- Token: `{{adminToken}}`
+
+### 17I. Get college overview as admin
+
+- Method: `GET`
+- URL: `{{baseUrl}}/api/colleges/{{collegeRecordId}}/overview`
+- Token: `{{adminToken}}`
+
+### 17J. Delete college as admin
+
+- Method: `DELETE`
+- URL: `{{baseUrl}}/api/colleges/{{collegeRecordId}}`
+- Token: `{{adminToken}}`
+
+Expected:
+
+- `200 OK`
+- confirmation JSON returned
+
+## Step 17D. Test Analytics Routes
+
+### 17D. Get admin analytics
+
+- Method: `GET`
+- URL: `{{baseUrl}}/api/analytics/admin`
+- Token: `{{adminToken}}`
+
+Expected:
+
+- `200 OK`
+- totals, roleDistribution, categoryDistribution, topEvents
+
+### 17E. Get college analytics as organizer
+
+- Method: `GET`
+- URL: `{{baseUrl}}/api/analytics/college`
+- Token: `{{collegeToken}}`
+
+Expected:
+
+- `200 OK`
+- totals, registrationsByStatus, topEvents
+
+### 17F. Get college analytics as admin for a specific college
+
+- Method: `GET`
+- URL: `{{baseUrl}}/api/analytics/college`
+- Token: `{{adminToken}}`
+- `Params` tab:
+  - `college_id` = `{{collegeId}}`
+
 ## Step 18. Test Error Cases Carefully
 
 These tests help confirm backend validation and permission rules.
@@ -908,6 +1148,15 @@ Expected:
 
 - `400` validation error or `500` if validation bubbles through generic handling
 - response should indicate required field issue
+
+### 18D2. Delete event as student
+
+- `DELETE /api/events/{{eventId}}`
+- student token
+
+Expected:
+
+- `403 Forbidden`
 
 ## Registration validation tests
 
@@ -989,6 +1238,66 @@ Expected:
 
 - `400`
 
+### 18J. Generate certificate for missing result
+
+- `POST /api/results/507f1f77bcf86cd799439011/certificate`
+- college token
+
+Expected:
+
+- `404 Result not found`
+
+### 18K. Download certificate as another student
+
+Use a different student token if available.
+
+Expected:
+
+- `403 Forbidden`
+
+## Upload validation tests
+
+### 18L. Upload without file
+
+- `POST /api/upload`
+- admin token
+- form-data with only `kind`
+
+Expected:
+
+- `400 file is required`
+
+### 18M. Upload as student
+
+- `POST /api/upload`
+- student token
+
+Expected:
+
+- `403 Forbidden`
+
+## College permission tests
+
+### 18N. Create college with college token
+
+- `POST /api/colleges`
+- college token
+
+Expected:
+
+- `403 Forbidden`
+
+## Analytics permission tests
+
+### 18O. Get admin analytics with college token
+
+- `GET /api/analytics/admin`
+- college token
+
+Expected:
+
+- `403 Forbidden`
+
 ## Step 19. Swagger and OpenAPI Static Route Checks
 
 ### 19A. OpenAPI JSON
@@ -1052,12 +1361,15 @@ You can organize the collection like this:
 - `POST Create Event`
 - `GET Events`
 - `GET Event By ID`
+- `PUT Update Event`
+- `DELETE Delete Event`
 
 ### Folder `04 Registrations`
 
 - `POST Register For Event`
 - `POST Register For Event By Path`
 - `GET Registrations`
+- `GET My Registrations`
 - `GET Registrations By Event`
 - `GET Registrations By Student`
 - `GET Registrations By Status`
@@ -1067,11 +1379,34 @@ You can organize the collection like this:
 
 - `POST Publish Result`
 - `POST Publish Result By Path`
+- `POST Generate Certificate`
+- `GET Download Certificate`
 - `GET Results`
 - `GET Results By Event`
 - `GET Results By Student`
 
-### Folder `06 Negative Tests`
+### Folder `06 Uploads`
+
+- `POST Upload File`
+
+### Folder `07 Colleges`
+
+- `POST Create College`
+- `GET Colleges`
+- `GET College By ID`
+- `PUT Update College`
+- `GET College Events`
+- `GET College Users`
+- `GET College Overview`
+- `DELETE Delete College`
+
+### Folder `08 Analytics`
+
+- `GET Admin Analytics`
+- `GET College Analytics`
+- `GET College Analytics By ID`
+
+### Folder `09 Negative Tests`
 
 - wrong password
 - missing token
@@ -1080,6 +1415,10 @@ You can organize the collection like this:
 - missing event ID
 - missing student ID
 - duplicate result
+- upload without file
+- upload as student
+- create college with non-admin token
+- admin analytics with non-admin token
 
 ## Optional Collection-Level Authorization Setup
 
@@ -1128,11 +1467,17 @@ A full successful Postman test run should confirm:
 - role restrictions work
 - admin-only user APIs work
 - events can be created and fetched
+- events can be updated and deleted with correct role checks
 - students can register for events
+- students can fetch their own registrations via `/api/registrations/me`
 - duplicate registrations are blocked
 - registration status can be updated
 - results can be published
+- certificates can be generated and downloaded in the correct role context
 - duplicate results are blocked
+- uploads work
+- college CRUD and overview routes work
+- analytics routes work
 - filters on registrations and results work
 - static docs routes are accessible
 
@@ -1203,13 +1548,29 @@ Before finishing, verify all of these:
 - `POST /api/events`
 - `GET /api/events`
 - `GET /api/events/:id`
+- `PUT /api/events/:id`
+- `DELETE /api/events/:id`
 - `POST /api/registrations`
 - `POST /api/registrations/:eventId`
+- `GET /api/registrations/me`
 - `GET /api/registrations`
 - `PATCH /api/registrations/:id`
 - `POST /api/results`
 - `POST /api/results/:eventId`
+- `POST /api/results/:id/certificate`
+- `GET /api/results/:id/certificate`
 - `GET /api/results`
+- `POST /api/upload`
+- `GET /api/colleges`
+- `GET /api/colleges/:id`
+- `POST /api/colleges`
+- `PUT /api/colleges/:id`
+- `DELETE /api/colleges/:id`
+- `GET /api/colleges/:id/events`
+- `GET /api/colleges/:id/users`
+- `GET /api/colleges/:id/overview`
+- `GET /api/analytics/admin`
+- `GET /api/analytics/college`
 - `GET /openapi.json`
 - `GET /swagger`
 - `GET /swagger/index.html`

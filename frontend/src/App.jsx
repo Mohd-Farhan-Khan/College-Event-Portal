@@ -17,6 +17,9 @@ import { AdminDashboard } from './pages/Admin/AdminDashboard';
 import { AdminCreateEvent } from './pages/Admin/AdminCreateEvent';
 import { AdminRegistrations } from './pages/Admin/AdminRegistrations';
 import { AdminPublishResults } from './pages/Admin/AdminPublishResults';
+import { AdminCollegesList } from './pages/Admin/AdminCollegesList';
+import { AdminCollegeCreate } from './pages/Admin/AdminCollegeCreate';
+import { StudentRegistrations } from './pages/StudentRegistrations/StudentRegistrations';
 
 function App() {
   return (
@@ -31,6 +34,8 @@ function App() {
           <Route path="/me" element={<Profile />} />
           <Route path="/results" element={<Results />} />
           
+          <Route path="/student/registrations" element={<StudentRegistrations />} />
+
           <Route path="/college/dashboard" element={<CollegeDashboard />} />
           <Route path="/college/events/new" element={<CreateEvent />} />
           <Route path="/college/registrations" element={<ManageRegistrations />} />
@@ -42,6 +47,8 @@ function App() {
           <Route path="/admin/events/new" element={<AdminCreateEvent />} />
           <Route path="/admin/registrations" element={<AdminRegistrations />} />
           <Route path="/admin/results/new" element={<AdminPublishResults />} />
+          <Route path="/admin/colleges" element={<AdminCollegesList />} />
+          <Route path="/admin/colleges/new" element={<AdminCollegeCreate />} />
         </Routes>
       </AuthProvider>
     </BrowserRouter>
@@ -49,3 +56,4 @@ function App() {
 }
 
 export default App;
+

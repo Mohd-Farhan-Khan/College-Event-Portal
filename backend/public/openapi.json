@@ -170,6 +170,22 @@
         "summary": "Get event by id",
         "parameters": [ { "name": "id", "in": "path", "required": true, "schema": { "type": "string" } } ],
         "responses": { "200": { "description": "OK" }, "404": { "description": "Not Found" } }
+      },
+      "put": {
+        "summary": "Update event (college/admin owner)",
+        "security": [{ "bearerAuth": [] }],
+        "parameters": [ { "name": "id", "in": "path", "required": true, "schema": { "type": "string" } } ],
+        "requestBody": {
+          "required": true,
+          "content": { "application/json": { "schema": { "$ref": "#/components/schemas/EventCreate" } } }
+        },
+        "responses": { "200": { "description": "Updated" }, "401": { "description": "Unauthorized" }, "403": { "description": "Forbidden" }, "404": { "description": "Not Found" } }
+      },
+      "delete": {
+        "summary": "Delete event (college/admin owner)",
+        "security": [{ "bearerAuth": [] }],
+        "parameters": [ { "name": "id", "in": "path", "required": true, "schema": { "type": "string" } } ],
+        "responses": { "200": { "description": "Deleted" }, "401": { "description": "Unauthorized" }, "403": { "description": "Forbidden" }, "404": { "description": "Not Found" } }
       }
     },
     "/api/registrations": {
@@ -188,6 +204,17 @@
         "security": [{ "bearerAuth": [] }],
         "requestBody": { "required": true, "content": { "application/json": { "schema": { "type": "object", "required": ["event_id"], "properties": { "event_id": { "type": "string" } } } } } },
         "responses": { "201": { "description": "Created" }, "400": { "description": "Bad Request" }, "401": { "description": "Unauthorized" } }
+      }
+    },
+    "/api/registrations/me": {
+      "get": {
+        "summary": "Get my registrations",
+        "security": [{ "bearerAuth": [] }],
+        "parameters": [
+          { "name": "event_id", "in": "query", "schema": { "type": "string" } },
+          { "name": "status", "in": "query", "schema": { "type": "string" } }
+        ],
+        "responses": { "200": { "description": "OK" }, "401": { "description": "Unauthorized" }, "403": { "description": "Forbidden" } }
       }
     },
     "/api/registrations/{eventId}": {
@@ -230,6 +257,128 @@
         "parameters": [ { "name": "eventId", "in": "path", "required": true, "schema": { "type": "string" } } ],
         "requestBody": { "required": true, "content": { "application/json": { "schema": { "type": "object", "required": ["student_id", "position"], "properties": { "student_id": { "type": "string" }, "position": { "type": "number" }, "certificate_url": { "type": "string" } } } } } },
         "responses": { "201": { "description": "Created" }, "400": { "description": "Bad Request" }, "401": { "description": "Unauthorized" }, "403": { "description": "Forbidden" } }
+      }
+    },
+    "/api/results/{id}/certificate": {
+      "post": {
+        "summary": "Generate certificate for result",
+        "security": [{ "bearerAuth": [] }],
+        "parameters": [ { "name": "id", "in": "path", "required": true, "schema": { "type": "string" } } ],
+        "responses": { "200": { "description": "Generated" }, "401": { "description": "Unauthorized" }, "403": { "description": "Forbidden" }, "404": { "description": "Not Found" } }
+      },
+      "get": {
+        "summary": "Download certificate for result",
+        "security": [{ "bearerAuth": [] }],
+        "parameters": [ { "name": "id", "in": "path", "required": true, "schema": { "type": "string" } } ],
+        "responses": { "200": { "description": "Certificate file" }, "401": { "description": "Unauthorized" }, "403": { "description": "Forbidden" }, "404": { "description": "Not Found" } }
+      }
+    },
+    "/api/upload": {
+      "post": {
+        "summary": "Upload poster or certificate asset",
+        "security": [{ "bearerAuth": [] }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "required": ["file"],
+                "properties": {
+                  "file": { "type": "string", "format": "binary" },
+                  "kind": { "type": "string", "enum": ["poster", "certificate", "generic"] }
+                }
+              }
+            }
+          }
+        },
+        "responses": { "201": { "description": "Uploaded" }, "400": { "description": "Bad Request" }, "401": { "description": "Unauthorized" }, "403": { "description": "Forbidden" } }
+      }
+    },
+    "/api/colleges": {
+      "get": {
+        "summary": "List colleges",
+        "responses": { "200": { "description": "OK" } }
+      },
+      "post": {
+        "summary": "Create college",
+        "security": [{ "bearerAuth": [] }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["name"],
+                "properties": {
+                  "name": { "type": "string" },
+                  "location": { "type": "string" },
+                  "description": { "type": "string" },
+                  "logo_url": { "type": "string" }
+                }
+              }
+            }
+          }
+        },
+        "responses": { "201": { "description": "Created" }, "401": { "description": "Unauthorized" }, "403": { "description": "Forbidden" } }
+      }
+    },
+    "/api/colleges/{id}": {
+      "get": {
+        "summary": "Get college by id",
+        "parameters": [ { "name": "id", "in": "path", "required": true, "schema": { "type": "string" } } ],
+        "responses": { "200": { "description": "OK" }, "404": { "description": "Not Found" } }
+      },
+      "put": {
+        "summary": "Update college",
+        "security": [{ "bearerAuth": [] }],
+        "parameters": [ { "name": "id", "in": "path", "required": true, "schema": { "type": "string" } } ],
+        "responses": { "200": { "description": "Updated" }, "401": { "description": "Unauthorized" }, "403": { "description": "Forbidden" }, "404": { "description": "Not Found" } }
+      },
+      "delete": {
+        "summary": "Delete college",
+        "security": [{ "bearerAuth": [] }],
+        "parameters": [ { "name": "id", "in": "path", "required": true, "schema": { "type": "string" } } ],
+        "responses": { "200": { "description": "Deleted" }, "401": { "description": "Unauthorized" }, "403": { "description": "Forbidden" }, "404": { "description": "Not Found" } }
+      }
+    },
+    "/api/colleges/{id}/events": {
+      "get": {
+        "summary": "List events for a college",
+        "parameters": [ { "name": "id", "in": "path", "required": true, "schema": { "type": "string" } } ],
+        "responses": { "200": { "description": "OK" }, "404": { "description": "Not Found" } }
+      }
+    },
+    "/api/colleges/{id}/users": {
+      "get": {
+        "summary": "List users for a college",
+        "security": [{ "bearerAuth": [] }],
+        "parameters": [ { "name": "id", "in": "path", "required": true, "schema": { "type": "string" } } ],
+        "responses": { "200": { "description": "OK" }, "401": { "description": "Unauthorized" }, "403": { "description": "Forbidden" }, "404": { "description": "Not Found" } }
+      }
+    },
+    "/api/colleges/{id}/overview": {
+      "get": {
+        "summary": "Get college management overview",
+        "security": [{ "bearerAuth": [] }],
+        "parameters": [ { "name": "id", "in": "path", "required": true, "schema": { "type": "string" } } ],
+        "responses": { "200": { "description": "OK" }, "401": { "description": "Unauthorized" }, "403": { "description": "Forbidden" }, "404": { "description": "Not Found" } }
+      }
+    },
+    "/api/analytics/admin": {
+      "get": {
+        "summary": "Get platform analytics",
+        "security": [{ "bearerAuth": [] }],
+        "parameters": [ { "name": "college_id", "in": "query", "schema": { "type": "string" } } ],
+        "responses": { "200": { "description": "OK" }, "401": { "description": "Unauthorized" }, "403": { "description": "Forbidden" } }
+      }
+    },
+    "/api/analytics/college": {
+      "get": {
+        "summary": "Get college-scoped analytics",
+        "security": [{ "bearerAuth": [] }],
+        "parameters": [ { "name": "college_id", "in": "query", "schema": { "type": "string" } } ],
+        "responses": { "200": { "description": "OK" }, "401": { "description": "Unauthorized" }, "403": { "description": "Forbidden" } }
       }
     }
   }

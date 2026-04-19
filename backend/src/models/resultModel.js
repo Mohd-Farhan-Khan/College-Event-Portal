@@ -11,6 +11,11 @@ const resultSchema = new mongoose.Schema(
   student_id: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true, alias: "user" },
     position: { type: Number, required: true },
   certificate_url: { type: String, alias: "certificateUrl" },
+  certificate_storage: {
+      type: String,
+      enum: ["local", "cloudinary", "external"],
+    },
+  certificate_storage_path: { type: String },
   },
   { timestamps: { createdAt: "issuedAt", updatedAt: false } },
 );

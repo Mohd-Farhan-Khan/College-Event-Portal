@@ -1,6 +1,36 @@
 import Registration from "../models/registrationModel.js";
 import Event from "../models/eventModel.js";
 
+const buildRegistrationQuery = async (req) => {
+  const filter = {};
+  const { event, event_id, user, student_id, status } = req.query;
+  if (event || event_id) filter.event_id = event_id || event;
+  if (user || student_id) filter.student_id = student_id || user;
+  if (status) filter.status = status;
+
+  if (req.user.role === "college") {
+    const ownedEvents = await Event.find({
+      $or: [{ createdBy: req.user._id }, { college_id: req.user.college_id }],
+    }).select("_id");
+    const ownedEventIds = ownedEvents.map(({ _id }) => _id);
+    if (filter.event_id) {
+      const requestedEventId = filter.event_id.toString();
+      const ownsRequestedEvent = ownedEventIds.some(
+        (ownedEventId) => ownedEventId.toString() === requestedEventId,
+      );
+      if (!ownsRequestedEvent) {
+        return null;
+      }
+    } else {
+      filter.event_id = { $in: ownedEventIds };
+    }
+  } else if (req.user.role === "student") {
+    filter.student_id = req.user._id;
+  }
+
+  return filter;
+};
+
 export const registerForEvent = async (req, res, next) => {
   try {
     const eventId = req.params.eventId || req.body?.event_id || req.body?.event;
@@ -44,35 +74,24 @@ export const registerForEvent = async (req, res, next) => {
 
 export const getRegistrations = async (req, res, next) => {
   try {
-    const filter = {};
-    const { event, event_id, user, student_id, status } = req.query;
-    if (event || event_id) filter.event_id = event_id || event;
-    if (user || student_id) filter.student_id = student_id || user;
-    if (status) filter.status = status;
-
-    if (req.user.role === "college") {
-      const ownedEvents = await Event.find({
-        $or: [{ createdBy: req.user._id }, { college_id: req.user.college_id }],
-      }).select("_id");
-      const ownedEventIds = ownedEvents.map(({ _id }) => _id);
-      if (filter.event_id) {
-        const requestedEventId = filter.event_id.toString();
-        const ownsRequestedEvent = ownedEventIds.some(
-          (ownedEventId) => ownedEventId.toString() === requestedEventId,
-        );
-        if (!ownsRequestedEvent) {
-          return res.json([]);
-        }
-      } else {
-        filter.event_id = { $in: ownedEventIds };
-      }
-    } else if (req.user.role === "student") {
-      filter.student_id = req.user._id;
-    }
+    const filter = await buildRegistrationQuery(req);
+    if (filter === null) return res.json([]);
 
     const regs = await Registration.find(filter)
       .populate("student_id", "name")
-      .populate("event_id", "title");
+      .populate("event_id", "title date venue");
+    res.json(regs);
+  } catch (err) {
+    next(err);
+  }
+};
+
+export const getMyRegistrations = async (req, res, next) => {
+  try {
+    const filter = await buildRegistrationQuery(req);
+    const regs = await Registration.find(filter)
+      .populate("student_id", "name")
+      .populate("event_id", "title date venue");
     res.json(regs);
   } catch (err) {
     next(err);
@@ -120,4 +139,4 @@ export const updateRegistrationStatus = async (req, res, next) => {
   }
 };
 
-export default { registerForEvent, getRegistrations, updateRegistrationStatus };
+export default { registerForEvent, getRegistrations, getMyRegistrations, updateRegistrationStatus };

@@ -86,5 +86,48 @@ export function getEvent(id) {
   return request(`/api/events/${id}`);
 }
 
+/* ───── Registrations ───── */
+
+/**
+ * GET /api/registrations/me  – student's own registrations
+ * @param {{ event_id?: string, status?: string }} [filters]
+ */
+export function getMyRegistrations(filters = {}) {
+  const params = new URLSearchParams();
+  if (filters.event_id) params.append('event_id', filters.event_id);
+  if (filters.status) params.append('status', filters.status);
+  const q = params.toString();
+  return request(`/api/registrations/me${q ? `?${q}` : ''}`);
+}
+
+/* ───── Colleges ───── */
+
+export function getColleges() {
+  return request('/api/colleges');
+}
+
+export function getCollege(id) {
+  return request(`/api/colleges/${id}`);
+}
+
+/**
+ * POST /api/colleges
+ * @param {{ name: string, location?: string, description?: string, logo_url?: string }} data
+ */
+export function createCollege(data) {
+  return request('/api/colleges', { method: 'POST', body: data });
+}
+
+export function deleteCollege(id) {
+  return request(`/api/colleges/${id}`, { method: 'DELETE' });
+}
+
+/* ───── Upload ───── */
+
+/**
+ * POST /api/upload  (multipart/form-data — handled outside the JSON wrapper)
+ * Use the raw fetch for file uploads; see AdminCollegeCreate for usage.
+ */
+
 /* ───── Generic export for future use ───── */
 export { request };

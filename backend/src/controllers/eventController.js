@@ -1,4 +1,14 @@
 import Event from "../models/eventModel.js";
+import Registration from "../models/registrationModel.js";
+import Result from "../models/resultModel.js";
+
+const getRefId = (value) => value?._id?.toString() || value?.toString?.();
+
+const canManageEvent = (event, user) => {
+  if (user.role === "admin") return true;
+  return getRefId(event.createdBy) === user._id.toString()
+    || getRefId(event.college_id) === getRefId(user.college_id);
+};
 
 export const createEvent = async (req, res, next) => {
   try {
@@ -48,4 +58,60 @@ export const getEvent = async (req, res, next) => {
   }
 };
 
-export default { createEvent, getEvents, getEvent };
+export const updateEvent = async (req, res, next) => {
+  try {
+    const event = await Event.findById(req.params.id);
+    if (!event) return res.status(404).json({ message: "Event not found" });
+
+    if (!canManageEvent(event, req.user)) {
+      return res.status(403).json({ message: "Forbidden: event access denied" });
+    }
+
+    const updates = { ...req.body };
+    delete updates.id;
+    delete updates._id;
+    delete updates.createdBy;
+
+    const allowedFields = ["title", "description", "category", "date", "venue", "poster_url", "posterUrl", "college", "college_id"];
+    for (const [key, value] of Object.entries(updates)) {
+      if (!allowedFields.includes(key)) continue;
+      event[key] = value;
+    }
+
+    if (req.user.role === "college") {
+      event.college = req.user.college_id;
+    }
+
+    await event.save();
+    const populatedEvent = await Event.findById(event._id).populate("college_id createdBy", "name");
+    res.json(populatedEvent);
+  } catch (err) {
+    next(err);
+  }
+};
+
+export const deleteEvent = async (req, res, next) => {
+  try {
+    const event = await Event.findById(req.params.id);
+    if (!event) return res.status(404).json({ message: "Event not found" });
+
+    if (!canManageEvent(event, req.user)) {
+      return res.status(403).json({ message: "Forbidden: event access denied" });
+    }
+
+    await Promise.all([
+      Registration.deleteMany({ event_id: event._id }),
+      Result.deleteMany({ event_id: event._id }),
+      Event.deleteOne({ _id: event._id }),
+    ]);
+
+    res.json({
+      message: "Event deleted successfully",
+      deletedEventId: event._id,
+    });
+  } catch (err) {
+    next(err);
+  }
+};
+
+export default { createEvent, getEvents, getEvent, updateEvent, deleteEvent };

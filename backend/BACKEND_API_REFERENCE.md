@@ -793,15 +793,10 @@ The PRD mentions some features that are not present in the current backend imple
 - logout endpoint
 - refresh token endpoint
 - change password / forgot password / reset password
-- event update and delete endpoints
-- upload endpoint
-- Cloudinary upload flow in routes/controllers
-- certificate generation flow in routes/controllers
-- analytics endpoints
 - pagination and advanced filtering
 - automated tests
 
-There are placeholders/utilities for Cloudinary and certificate generation, but no exposed API route currently uses them.
+Cloudinary-backed storage is supported when credentials are configured. Local public file storage is used as a development fallback for uploads and generated certificates.
 
 ## Issues Found and Corrected During Review
 

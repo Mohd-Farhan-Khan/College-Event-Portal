@@ -36,6 +36,9 @@ Not implemented in backend and therefore frontend pages/features are `[blocked]`
 - forgot password
 - reset password
 - change password
+
+Implemented after the initial version of this guide and now available for frontend integration:
+
 - update event
 - delete event
 - upload endpoint
@@ -1324,12 +1327,9 @@ Recommended UI messages:
 
 These should not be silently invented by frontend code:
 
-- college picker driven by backend data `[blocked]`
-- event editing `[blocked]`
-- event deletion `[blocked]`
-- certificate downloads `[blocked]`
+- logout endpoint `[blocked]`
+- refresh token `[blocked]`
 - password reset flows `[blocked]`
-- analytics pages `[blocked]`
 
 If placeholders are implemented, label them clearly as:
 
@@ -1348,3 +1348,467 @@ A correct frontend implementation based on this guide must:
 - avoid inventing unsupported features
 - explicitly mark blocked flows
 - follow the implementation order above so dependencies are built before dependent pages
+
+## Backend Update Addendum
+
+This section captures backend capabilities implemented after the original guide was drafted.
+
+### Newly Available Endpoints
+
+#### Events
+
+- `PUT /api/events/:id`
+- `DELETE /api/events/:id`
+
+Auth:
+
+- `college | admin`
+
+Access rule:
+
+- college users can update or delete only events they own
+- admin users can update or delete any event
+
+Update-friendly request fields:
+
+- `title`
+- `description`
+- `category`
+- `date`
+- `venue`
+- `poster_url`
+- `posterUrl`
+- `college`
+- `college_id` for admin flows
+
+Delete response:
+
+```json
+{
+  "message": "Event deleted successfully",
+  "deletedEventId": "eventObjectId"
+}
+```
+
+#### Uploads
+
+- `POST /api/upload`
+
+Auth:
+
+- `college | admin`
+
+Content type:
+
+- `multipart/form-data`
+
+Form fields:
+
+- `file` required
+- `kind` optional: `poster | certificate | generic`
+
+Success response:
+
+```json
+{
+  "url": "http://localhost:8000/uploads/posters/...",
+  "publicId": "uploads/posters/...",
+  "filename": "poster.png",
+  "mimeType": "image/png",
+  "size": 12345,
+  "storage": "local"
+}
+```
+
+Frontend use:
+
+- use returned `url` directly as `posterUrl` or `certificateUrl`
+
+#### Result Certificates
+
+- `POST /api/results/:id/certificate`
+- `GET /api/results/:id/certificate`
+
+Generate auth:
+
+- `college | admin`
+
+Download auth:
+
+- `student | college | admin`
+
+Access rule:
+
+- students can download only their own certificate
+- college users can generate/download only for results tied to their own events
+- admin users can generate/download for any result
+
+Generate response:
+
+- returns the updated result object
+- `certificate_url` becomes a protected backend download URL
+
+Frontend use:
+
+- use `certificate_url` from the result row for certificate CTA buttons
+
+#### Colleges
+
+- `GET /api/colleges`
+- `GET /api/colleges/:id`
+- `POST /api/colleges`
+- `PUT /api/colleges/:id`
+- `DELETE /api/colleges/:id`
+- `GET /api/colleges/:id/events`
+- `GET /api/colleges/:id/users`
+- `GET /api/colleges/:id/overview`
+
+Access rules:
+
+- public can view `GET /api/colleges` and `GET /api/colleges/:id`
+- only `admin` can create, update, delete, view college users, and view management overview
+
+College create/update fields:
+
+- `name` required for create
+- `location`
+- `description`
+- `logo_url`
+- `logoUrl`
+
+#### Analytics
+
+- `GET /api/analytics/admin`
+- `GET /api/analytics/college`
+
+Access rules:
+
+- `/api/analytics/admin` -> `admin` only
+- `/api/analytics/college` -> `college | admin`
+
+Optional query:
+
+- `college_id`
+
+Admin analytics response sections:
+
+- `scope`
+- `totals`
+- `roleDistribution`
+- `categoryDistribution`
+- `topEvents`
+
+College analytics response sections:
+
+- `scope`
+- `college`
+- `totals`
+- `registrationsByStatus`
+- `topEvents`
+
+#### Student Registrations
+
+- `GET /api/registrations/me`
+
+Auth:
+
+- `student`
+
+Supported query filters:
+
+- `event_id`
+- `status`
+
+Recommended frontend purpose:
+
+- dedicated student “My Registrations” page
+- student dashboard module if product wants one
+
+### Recommended New or Updated Pages
+
+### Page 20. Student My Registrations
+
+Route:
+
+- `/student/registrations`
+
+Purpose:
+
+- show only the logged-in student’s registrations in a dedicated page
+
+Backend endpoints used:
+
+- `GET /api/registrations/me`
+- optional `GET /api/registrations/me?status=:status`
+- optional `GET /api/registrations/me?event_id=:eventId`
+
+Information to display per row/card:
+
+- registration `_id`
+- `status`
+- `registeredAt`
+- `event_id._id`
+- `event_id.title`
+- `event_id.date`
+- `event_id.venue`
+
+Recommended UX:
+
+- status filter chips for `pending`, `confirmed`, `cancelled`
+- event search by title or event id
+- link to `/events/:eventId`
+
+### Page 21. Admin Colleges List
+
+Route:
+
+- `/admin/colleges`
+
+Purpose:
+
+- list all colleges
+- provide entry points to create, inspect, edit, and delete colleges
+
+Backend endpoints used:
+
+- `GET /api/colleges`
+- `DELETE /api/colleges/:id`
+
+Information to display:
+
+- `_id`
+- `name`
+- `location`
+- `description`
+- `logo_url`
+- `createdAt`
+
+Recommended row actions:
+
+- view details
+- edit
+- delete with explicit confirmation
+
+### Page 22. Admin College Create
+
+Route:
+
+- `/admin/colleges/new`
+
+Purpose:
+
+- create a new college record
+
+Backend endpoints used:
+
+- `POST /api/colleges`
+- optional `POST /api/upload` for logo upload before submit
+
+Required request fields:
+
+- `name`
+
+Optional request fields:
+
+- `location`
+- `description`
+- `logo_url`
+- `logoUrl`
+
+Recommended form behavior:
+
+- logo uploader should first call upload endpoint with `kind=poster` or `kind=generic`
+- submit returned file `url` as `logo_url` or `logoUrl`
+
+### Page 23. Admin College Detail / Management
+
+Route:
+
+- `/admin/colleges/:collegeId`
+
+Purpose:
+
+- inspect one college
+- show its linked events, linked users, and overview metrics
+
+Backend endpoints used:
+
+- `GET /api/colleges/:id`
+- `GET /api/colleges/:id/overview`
+- `GET /api/colleges/:id/events`
+- `GET /api/colleges/:id/users`
+
+Core college information to display:
+
+- `_id`
+- `name`
+- `location`
+- `description`
+- `logo_url`
+
+Overview metrics to display:
+
+- `metrics.usersCount`
+- `metrics.eventsCount`
+- `metrics.registrationsCount`
+- `metrics.confirmedRegistrations`
+- `metrics.resultsCount`
+
+Related collections to display:
+
+- recent events from `recentEvents`
+- all college events from `/events`
+- all linked users from `/users`
+
+Recommended actions:
+
+- edit college
+- delete college
+- deep link to event detail pages
+
+### Page 24. Admin College Edit
+
+Route:
+
+- `/admin/colleges/:collegeId/edit`
+
+Purpose:
+
+- update an existing college
+
+Backend endpoints used:
+
+- `GET /api/colleges/:id`
+- `PUT /api/colleges/:id`
+- optional `POST /api/upload`
+
+Editable fields:
+
+- `name`
+- `location`
+- `description`
+- `logo_url`
+- `logoUrl`
+
+### Page 25. Admin Analytics
+
+Route:
+
+- `/admin/analytics`
+
+Purpose:
+
+- show platform-level analytics with optional college scoping
+
+Backend endpoints used:
+
+- `GET /api/analytics/admin`
+- optional `GET /api/analytics/admin?college_id=:collegeId`
+- optional `GET /api/colleges` for college filter options
+
+Data to visualize:
+
+- `totals.usersCount`
+- `totals.collegesCount`
+- `totals.eventsCount`
+- `totals.registrationsCount`
+- `totals.confirmedRegistrations`
+- `totals.resultsCount`
+- `roleDistribution`
+- `categoryDistribution`
+- `topEvents`
+
+Recommended UI sections:
+
+- KPI cards
+- role distribution chart
+- event category chart
+- top events leaderboard/table
+- optional college filter dropdown powered by `/api/colleges`
+
+### Page 26. College Analytics
+
+Route:
+
+- `/college/analytics`
+
+Purpose:
+
+- show analytics for the logged-in organizer’s college scope
+
+Backend endpoints used:
+
+- `GET /api/analytics/college`
+
+Data to visualize:
+
+- `college.name` if present
+- `totals.eventsCount`
+- `totals.registrationsCount`
+- `totals.resultsCount`
+- `registrationsByStatus`
+- `topEvents`
+
+Recommended UI sections:
+
+- summary KPI cards
+- status distribution chart
+- top events table
+
+### Existing Pages That Should Be Enhanced
+
+These do not need entirely new route designs if the current frontend already has strong layouts.
+
+#### Event Detail / Event Listing / Organizer Event Cards
+
+Add controls for authorized users:
+
+- edit event CTA
+- delete event CTA with confirmation
+
+Use endpoints:
+
+- `PUT /api/events/:id`
+- `DELETE /api/events/:id`
+
+Role visibility:
+
+- show only for event owners or admins
+- never show for students
+
+#### Admin Event Creation and Signup
+
+These pages no longer need a manual-only college id workflow.
+
+Enhancement:
+
+- load colleges from `GET /api/colleges`
+- use a proper searchable picker/dropdown
+
+Use selected value as:
+
+- `college`
+- or `college_id`
+
+#### Result Listing, Publish Result, and Admin Publish Result
+
+Add certificate actions:
+
+- generate certificate button on result row if certificate does not exist
+- download certificate button if `certificate_url` exists
+
+Use endpoints:
+
+- `POST /api/results/:id/certificate`
+- `GET /api/results/:id/certificate`
+
+#### Event and College Forms
+
+Use upload endpoint for image fields instead of asking for raw URLs only.
+
+Upload flow:
+
+1. select file
+2. `POST /api/upload`
+3. take returned `url`
+4. save as `posterUrl`, `poster_url`, `logoUrl`, or `logo_url`

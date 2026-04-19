@@ -6,9 +6,12 @@ Express + MongoDB API for managing colleges, events, registrations, and results.
 
 - Auth (register/login/me) with JWT
 - Role-based access (student, college, admin)
-- Manage events, registrations, results
-- Cloudinary integration placeholder
-- Certificate generation placeholder
+- Manage events, registrations, and results
+- Event update/delete for organizers and admins
+- College CRUD plus college management helpers
+- Scoped analytics endpoints for admin and organizers
+- File upload endpoint with Cloudinary-or-local fallback
+- Certificate generation and protected download endpoints
 - Interactive API documentation (Swagger UI)
 
 ## Env Variables (.env)
@@ -69,10 +72,13 @@ Events
 - `POST /api/events` (Bearer; role: college|admin)
 - `GET /api/events`
 - `GET /api/events/:id`
+- `PUT /api/events/:id` (Bearer; role: college|admin; owner-or-admin)
+- `DELETE /api/events/:id` (Bearer; role: college|admin; owner-or-admin)
 
 Registrations
 - `POST /api/registrations` (Bearer; role: student) body: `{ "event_id": "<eventId>" }`
 - `POST /api/registrations/:eventId` (Bearer; role: student)
+- `GET /api/registrations/me` (Bearer; role: student)
 - `GET /api/registrations` (Bearer; role: student|college|admin) query: `event_id`, `student_id`
 - `PATCH /api/registrations/:id` (Bearer; role: college|admin) body: `{ "status": "pending|confirmed|cancelled" }`
 
@@ -80,6 +86,25 @@ Results
 - `POST /api/results` (Bearer; role: college|admin)
 - `POST /api/results/:eventId` (Bearer; role: college|admin)
 - `GET /api/results` query: `event_id`, `student_id`
+- `POST /api/results/:id/certificate` (Bearer; role: college|admin; owner-or-admin)
+- `GET /api/results/:id/certificate` (Bearer; role: student|college|admin with ownership checks)
+
+Uploads
+- `POST /api/upload` (Bearer; role: college|admin; `multipart/form-data` with `file` and optional `kind`)
+
+Colleges
+- `GET /api/colleges`
+- `GET /api/colleges/:id`
+- `POST /api/colleges` (Bearer; role: admin)
+- `PUT /api/colleges/:id` (Bearer; role: admin)
+- `DELETE /api/colleges/:id` (Bearer; role: admin)
+- `GET /api/colleges/:id/events`
+- `GET /api/colleges/:id/users` (Bearer; role: admin)
+- `GET /api/colleges/:id/overview` (Bearer; role: admin)
+
+Analytics
+- `GET /api/analytics/admin` (Bearer; role: admin; optional `college_id`)
+- `GET /api/analytics/college` (Bearer; role: college|admin; admin may pass optional `college_id`)
 
 ## Notes
 
@@ -106,5 +131,4 @@ The API documentation is served via Swagger UI:
 
 - Add validation (Joi / Zod)
 - Add pagination & filtering
-- Implement file uploads & certificate PDF
 - Add tests

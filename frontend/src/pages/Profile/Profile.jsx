@@ -24,6 +24,7 @@ function RoleBadge({ role }) {
 
 const studentLinks = [
   { href: '/events', label: 'Browse Events', description: 'Explore upcoming campus events' },
+  { href: '/student/registrations', label: 'My Registrations', description: 'View and track your event registrations' },
   { href: '/results', label: 'My Results', description: 'View published results for your registrations' },
 ];
 
@@ -35,6 +36,7 @@ const collegeLinks = [
 
 const adminLinks = [
   { href: '/admin/dashboard', label: 'Dashboard', description: 'View your admin overview and tasks' },
+  { href: '/admin/colleges', label: 'Manage Colleges', description: 'Manage platform colleges' },
   { href: '/events', label: 'Browse Events', description: 'Monitor all platform events' },
   { href: '/admin/users', label: 'All Users', description: 'View all users' },
 ];

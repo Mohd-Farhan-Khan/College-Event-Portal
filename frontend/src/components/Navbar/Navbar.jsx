@@ -31,7 +31,11 @@ export function Navbar() {
         {/* Desktop Nav */}
         <div className="navbar__links">
           <Link to="/events" className="navbar__link">Events</Link>
-          <Link to="#" className="navbar__link">Colleges</Link>
+          {user?.role === 'admin' ? (
+            <Link to="/admin/colleges" className="navbar__link">Colleges</Link>
+          ) : (
+            <Link to="#" className="navbar__link">Colleges</Link>
+          )}
           <Link to="#" className="navbar__link">About</Link>
         </div>
 
@@ -78,7 +82,11 @@ export function Navbar() {
         <div className="navbar__mobile" id="mobile-menu">
           <div className="navbar__mobile-inner">
             <Link to="/events" className="navbar__mobile-link" onClick={() => setIsOpen(false)}>Events</Link>
-            <Link to="#" className="navbar__mobile-link" onClick={() => setIsOpen(false)}>Colleges</Link>
+            {user?.role === 'admin' ? (
+              <Link to="/admin/colleges" className="navbar__mobile-link" onClick={() => setIsOpen(false)}>Colleges</Link>
+            ) : (
+              <Link to="#" className="navbar__mobile-link" onClick={() => setIsOpen(false)}>Colleges</Link>
+            )}
             <Link to="#" className="navbar__mobile-link" onClick={() => setIsOpen(false)}>About</Link>
             <div className="navbar__mobile-actions">
               {user ? (
