@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { 
   Users, ClipboardList, Trophy, CalendarPlus, ArrowRight,
-  CalendarDays, Award, GraduationCap, Building2, ShieldCheck, Loader2, AlertCircle
+  CalendarDays, Award, GraduationCap, Building2, ShieldCheck, Loader2, AlertCircle, BarChart3
 } from 'lucide-react';
 import { Navbar } from '../../components/Navbar/Navbar';
 import { Footer } from '../../components/Footer/Footer';
@@ -13,6 +13,7 @@ import './AdminDashboard.css';
 const QUICK_ACTIONS = [
   { label: "View Users",          icon: <Users size={20} />,        accent: "#2F5D50", bg: "#DCE8E1", link: "/admin/users" },
   { label: "Manage Colleges",     icon: <Building2 size={20} />,    accent: "#B56E4A", bg: "#F5E4D9", link: "/admin/colleges" },
+  { label: "Analytics",           icon: <BarChart3 size={20} />,    accent: "#2F5D50", bg: "#DCE8E1", link: "/admin/analytics" },
   { label: "Create Event",        icon: <CalendarPlus size={20} />, accent: "#B56E4A", bg: "#F5E4D9", link: "/admin/events/new" },
   { label: "Manage Registrations",icon: <ClipboardList size={20} />,accent: "#C7A86D", bg: "#F5F0E4", link: "/admin/registrations" },
   { label: "Publish Result",      icon: <Award size={20} />,        accent: "#2F5D50", bg: "#DCE8E1", link: "/admin/results/new" },

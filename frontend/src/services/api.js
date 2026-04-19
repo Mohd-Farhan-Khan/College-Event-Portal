@@ -122,6 +122,47 @@ export function deleteCollege(id) {
   return request(`/api/colleges/${id}`, { method: 'DELETE' });
 }
 
+/**
+ * PUT /api/colleges/:id
+ * @param {string} id
+ * @param {{ name?: string, location?: string, description?: string, logo_url?: string }} data
+ */
+export function updateCollege(id, data) {
+  return request(`/api/colleges/${id}`, { method: 'PUT', body: data });
+}
+
+export function getCollegeOverview(id) {
+  return request(`/api/colleges/${id}/overview`);
+}
+
+export function getCollegeEvents(id) {
+  return request(`/api/colleges/${id}/events`);
+}
+
+export function getCollegeUsers(id) {
+  return request(`/api/colleges/${id}/users`);
+}
+
+/* ───── Analytics ───── */
+
+/**
+ * GET /api/analytics/admin
+ * @param {{ college_id?: string }} [filters]
+ */
+export function getAdminAnalytics(filters = {}) {
+  const params = new URLSearchParams();
+  if (filters.college_id) params.append('college_id', filters.college_id);
+  const q = params.toString();
+  return request(`/api/analytics/admin${q ? `?${q}` : ''}`);
+}
+
+/**
+ * GET /api/analytics/college
+ */
+export function getCollegeAnalytics() {
+  return request('/api/analytics/college');
+}
+
 /* ───── Upload ───── */
 
 /**

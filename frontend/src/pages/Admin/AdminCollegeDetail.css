@@ -1,0 +1,450 @@
+/* AdminCollegeDetail.css */
+.acd-page {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background-color: var(--cep-background);
+}
+
+.acd-main {
+  flex-grow: 1;
+  padding: 3rem 1rem;
+}
+
+.acd-container {
+  max-width: 72rem;
+  margin: 0 auto;
+}
+
+/* Back Link */
+.acd-back-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  font-size: 0.875rem;
+  color: var(--cep-text-secondary);
+  margin-bottom: 1.5rem;
+  transition: color 0.2s ease;
+}
+.acd-back-link:hover { color: var(--cep-text-primary); }
+
+/* Header Card */
+.acd-header-card {
+  border-radius: 1rem;
+  border: 1px solid var(--cep-border);
+  background-color: var(--cep-surface);
+  overflow: hidden;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.05);
+  margin-bottom: 2rem;
+}
+
+.acd-header-banner {
+  height: 5.5rem;
+  background: linear-gradient(to right, #2F5D50, #1F2933);
+}
+
+.acd-header-body {
+  padding: 0 1.5rem 1.5rem;
+  margin-top: -3rem;
+}
+
+.acd-header-identity {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.acd-header-identity-left {
+  display: flex;
+  align-items: flex-end;
+  gap: 1rem;
+}
+
+.acd-logo-img,
+.acd-logo-placeholder {
+  height: 5.5rem;
+  width: 5.5rem;
+  border-radius: 1rem;
+  border: 3px solid var(--cep-surface);
+  flex-shrink: 0;
+}
+.acd-logo-img { object-fit: cover; }
+.acd-logo-placeholder {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: var(--cep-highlight);
+  color: var(--cep-accent-primary);
+  font-family: var(--font-serif);
+  font-size: 1.75rem;
+  font-weight: 700;
+}
+
+.acd-college-name {
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: var(--cep-text-primary);
+  margin-bottom: 0.25rem;
+  line-height: 1.2;
+}
+
+.acd-college-meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.75rem;
+  margin-top: 0.25rem;
+}
+
+.acd-college-location {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  font-size: 0.8125rem;
+  color: var(--cep-text-secondary);
+}
+
+.acd-college-id {
+  font-family: monospace;
+  font-size: 0.6875rem;
+  color: var(--cep-text-secondary);
+}
+
+.acd-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding-bottom: 0.25rem;
+}
+
+.acd-btn-edit {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  padding: 0.5rem 1rem;
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--cep-border);
+  background-color: var(--cep-surface);
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--cep-text-primary);
+  transition: all 0.2s ease;
+}
+.acd-btn-edit:hover { border-color: var(--cep-accent-primary); color: var(--cep-accent-primary); }
+
+.acd-btn-delete {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  padding: 0.5rem 1rem;
+  border-radius: var(--radius-lg);
+  border: 1px solid #F5E4D9;
+  background-color: #FDF7F5;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: #B56E4A;
+  transition: all 0.2s ease;
+}
+.acd-btn-delete:hover { background-color: #F5E4D9; }
+
+.acd-description {
+  margin-top: 1rem;
+  font-size: 0.875rem;
+  color: var(--cep-text-secondary);
+  line-height: 1.65;
+  max-width: 40rem;
+}
+
+/* Section */
+.acd-section { margin-bottom: 2rem; }
+.acd-section-title {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--cep-text-primary);
+  margin-bottom: 0.75rem;
+}
+.acd-section-hint {
+  font-family: var(--font-sans);
+  font-size: 0.6875rem;
+  font-weight: 400;
+  color: var(--cep-text-secondary);
+  margin-left: 0.375rem;
+}
+
+/* Metrics */
+.acd-metrics-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0.75rem;
+}
+@media (min-width: 640px) { .acd-metrics-grid { grid-template-columns: repeat(3, 1fr); } }
+@media (min-width: 900px) { .acd-metrics-grid { grid-template-columns: repeat(5, 1fr); } }
+
+.acd-metric-card {
+  border-radius: 1rem;
+  border: 1px solid var(--cep-border);
+  background-color: var(--cep-surface);
+  padding: 1.125rem;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.04);
+}
+.acd-metric-icon {
+  display: flex;
+  height: 2rem;
+  width: 2rem;
+  align-items: center;
+  justify-content: center;
+  border-radius: 0.625rem;
+  margin-bottom: 0.625rem;
+}
+.acd-metric-value {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--cep-text-primary);
+}
+.acd-metric-label {
+  font-size: 0.6875rem;
+  color: var(--cep-text-secondary);
+  margin-top: 0.125rem;
+}
+
+/* Two-column layout */
+.acd-two-col {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1.25rem;
+  margin-bottom: 2rem;
+}
+@media (min-width: 900px) {
+  .acd-two-col { grid-template-columns: 2fr 1fr; }
+}
+
+/* Card */
+.acd-card {
+  border-radius: 1rem;
+  border: 1px solid var(--cep-border);
+  background-color: var(--cep-surface);
+  overflow: hidden;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.04);
+}
+
+.acd-card-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  padding: 1rem 1.25rem;
+  border-bottom: 1px solid var(--cep-border);
+}
+.acd-card-title { font-size: 0.9375rem; font-weight: 600; color: var(--cep-text-primary); }
+.acd-card-hint { font-size: 0.6875rem; color: var(--cep-text-secondary); margin-top: 0.125rem; }
+.acd-view-all {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.125rem;
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: var(--cep-accent-primary);
+  white-space: nowrap;
+  transition: color 0.2s ease;
+}
+.acd-view-all:hover { color: var(--cep-text-primary); }
+
+/* Table */
+.acd-table { width: 100%; border-collapse: collapse; font-size: 0.875rem; }
+.acd-table thead tr { background-color: var(--cep-background); border-bottom: 1px solid var(--cep-border); }
+.acd-table th {
+  padding: 0.625rem 1.25rem;
+  text-align: left;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--cep-text-secondary);
+}
+.acd-table tbody tr {
+  border-bottom: 1px solid var(--cep-border);
+  transition: background-color 0.15s ease;
+}
+.acd-table tbody tr:last-child { border-bottom: none; }
+.acd-table tbody tr:hover { background-color: rgba(247, 244, 238, 0.6); }
+.acd-table td { padding: 0.75rem 1.25rem; }
+.acd-td-title { font-weight: 500; color: var(--cep-text-primary); }
+.acd-td-date { font-size: 0.75rem; color: var(--cep-text-secondary); white-space: nowrap; }
+
+.acd-status-badge {
+  display: inline-flex;
+  align-items: center;
+  border-radius: 9999px;
+  padding: 0.2rem 0.625rem;
+  font-size: 0.6875rem;
+  font-weight: 600;
+}
+.acd-status--upcoming { background-color: #DCE8E1; color: #2F5D50; }
+.acd-status--completed { background-color: #F0EDE8; color: var(--cep-text-secondary); }
+
+/* Users List */
+.acd-users-list { display: flex; flex-direction: column; }
+.acd-user-row {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.75rem 1.25rem;
+  border-bottom: 1px solid var(--cep-border);
+  transition: background-color 0.15s ease;
+}
+.acd-user-row:last-of-type { border-bottom: none; }
+.acd-user-row:hover { background-color: rgba(247, 244, 238, 0.6); }
+.acd-user-avatar {
+  height: 2rem;
+  width: 2rem;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: #fff;
+  flex-shrink: 0;
+}
+.acd-user-info { flex: 1; min-width: 0; }
+.acd-user-name { font-size: 0.875rem; font-weight: 500; color: var(--cep-text-primary); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.acd-user-email { font-size: 0.6875rem; color: var(--cep-text-secondary); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+.acd-role-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  border-radius: 9999px;
+  padding: 0.2rem 0.5rem;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  flex-shrink: 0;
+}
+.acd-role--organizer { background-color: #F5E4D9; color: #B56E4A; }
+.acd-role--student { background-color: #DCE8E1; color: #2F5D50; }
+
+.acd-users-footer {
+  padding: 0.625rem 1.25rem;
+  border-top: 1px solid var(--cep-border);
+  font-size: 0.75rem;
+  color: var(--cep-text-secondary);
+  text-align: center;
+}
+
+.acd-empty-inline {
+  padding: 2rem 1.25rem;
+  text-align: center;
+  font-size: 0.875rem;
+  color: var(--cep-text-secondary);
+}
+
+/* Danger Zone */
+.acd-danger-zone {
+  border-radius: 1rem;
+  border: 1px solid #F5E4D9;
+  background-color: #FDF7F5;
+  padding: 1.5rem;
+}
+.acd-danger-title {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #B56E4A;
+  margin-bottom: 0.75rem;
+}
+.acd-danger-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+.acd-danger-name { font-size: 0.875rem; font-weight: 500; color: var(--cep-text-primary); }
+.acd-danger-desc { font-size: 0.75rem; color: var(--cep-text-secondary); margin-top: 0.25rem; }
+
+.acd-btn-delete-solid {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  padding: 0.5rem 1rem;
+  border-radius: var(--radius-lg);
+  background-color: #B56E4A;
+  color: #fff;
+  font-size: 0.875rem;
+  font-weight: 500;
+  white-space: nowrap;
+  transition: background-color 0.2s ease;
+}
+.acd-btn-delete-solid:hover { background-color: #9a5d3e; }
+
+/* Reuse confirm dialog from AdminCollegesList.css */
+.confirm-dialog-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: rgba(31, 41, 51, 0.5);
+  animation: fadeIn 200ms ease;
+}
+.confirm-dialog {
+  background-color: var(--cep-surface);
+  border-radius: 1rem;
+  border: 1px solid var(--cep-border);
+  max-width: 28rem;
+  width: calc(100% - 2rem);
+  padding: 2rem;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.15);
+}
+.confirm-dialog__title { font-size: 1.25rem; font-weight: 700; color: var(--cep-text-primary); margin-bottom: 0.75rem; }
+.confirm-dialog__desc { font-size: 0.875rem; color: var(--cep-text-secondary); line-height: 1.6; margin-bottom: 1.5rem; }
+.confirm-dialog__desc p { margin-bottom: 0.5rem; }
+.confirm-dialog__confirm-field { margin-bottom: 1.5rem; }
+.confirm-dialog__confirm-label { font-size: 0.75rem; color: var(--cep-text-secondary); margin-bottom: 0.5rem; }
+.confirm-dialog__confirm-input {
+  width: 100%; height: 2.5rem; padding: 0 1rem;
+  border-radius: var(--radius-md); border: 1px solid var(--cep-border);
+  background-color: var(--cep-background); color: var(--cep-text-primary);
+  font-family: inherit; font-size: 0.875rem;
+}
+.confirm-dialog__confirm-input:focus { outline: none; border-color: #B56E4A; }
+.confirm-dialog__actions { display: flex; gap: 0.75rem; }
+.confirm-dialog__cancel {
+  flex: 1; height: 2.75rem; border-radius: var(--radius-lg);
+  border: 1px solid var(--cep-border); color: var(--cep-text-secondary);
+  font-weight: 500; font-size: 0.875rem; background: none; cursor: pointer; transition: all 0.2s ease;
+}
+.confirm-dialog__cancel:hover { background-color: var(--cep-background); }
+.confirm-dialog__delete {
+  flex: 1; height: 2.75rem; border-radius: var(--radius-lg);
+  border: none; background-color: #B56E4A; color: #fff;
+  font-weight: 600; font-size: 0.875rem; cursor: pointer; transition: all 0.2s ease;
+}
+.confirm-dialog__delete:hover { background-color: #a05d3d; }
+.confirm-dialog__delete:disabled { opacity: 0.5; cursor: not-allowed; }
+
+/* Shared admin states */
+.admin-loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 8rem 1rem;
+  gap: 0.75rem;
+  color: var(--cep-text-secondary);
+}
+.admin-loading__spinner { animation: spin 1s linear infinite; color: var(--cep-accent-primary); }
+@keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+
+.admin-error {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 5rem 1rem;
+  text-align: center;
+  gap: 0.5rem;
+}
+.admin-error__icon { color: #B56E4A; margin-bottom: 0.5rem; }
+.admin-error__title { font-size: 1.25rem; font-weight: 700; color: var(--cep-text-primary); }

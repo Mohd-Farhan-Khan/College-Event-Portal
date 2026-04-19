@@ -883,6 +883,13 @@ For the currently implemented backend, build these core routes. `/student/dashbo
 17. `/admin/registrations`
 18. `/admin/results/new`
 19. `/admin/dashboard`
+20. `/student/registrations` — **implemented**
+21. `/admin/colleges` — **implemented**
+22. `/admin/colleges/new` — **implemented**
+23. `/admin/colleges/:collegeId` — **implemented** (AdminCollegeDetail)
+24. `/admin/colleges/:collegeId/edit` — **implemented** (AdminCollegeEdit)
+25. `/admin/analytics` — **implemented** (AdminAnalytics)
+26. `/college/analytics` — **implemented** (CollegeAnalytics)
 
 If the product wants a lean first release, the minimum non-blocked launch set is:
 

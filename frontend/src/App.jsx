@@ -19,7 +19,11 @@ import { AdminRegistrations } from './pages/Admin/AdminRegistrations';
 import { AdminPublishResults } from './pages/Admin/AdminPublishResults';
 import { AdminCollegesList } from './pages/Admin/AdminCollegesList';
 import { AdminCollegeCreate } from './pages/Admin/AdminCollegeCreate';
+import { AdminCollegeDetail } from './pages/Admin/AdminCollegeDetail';
+import { AdminCollegeEdit } from './pages/Admin/AdminCollegeEdit';
+import { AdminAnalytics } from './pages/Admin/AdminAnalytics';
 import { StudentRegistrations } from './pages/StudentRegistrations/StudentRegistrations';
+import { CollegeAnalytics } from './pages/CollegeAnalytics/CollegeAnalytics';
 
 function App() {
   return (
@@ -49,6 +53,11 @@ function App() {
           <Route path="/admin/results/new" element={<AdminPublishResults />} />
           <Route path="/admin/colleges" element={<AdminCollegesList />} />
           <Route path="/admin/colleges/new" element={<AdminCollegeCreate />} />
+          <Route path="/admin/colleges/:collegeId" element={<AdminCollegeDetail />} />
+          <Route path="/admin/colleges/:collegeId/edit" element={<AdminCollegeEdit />} />
+          <Route path="/admin/analytics" element={<AdminAnalytics />} />
+
+          <Route path="/college/analytics" element={<CollegeAnalytics />} />
         </Routes>
       </AuthProvider>
     </BrowserRouter>

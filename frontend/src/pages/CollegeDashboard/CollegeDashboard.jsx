@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { CalendarPlus, ClipboardList, Award, ArrowRight, Clock, CheckCircle2, Users, Calendar } from 'lucide-react';
+import { CalendarPlus, ClipboardList, Award, ArrowRight, Clock, CheckCircle2, Users, Calendar, BarChart3 } from 'lucide-react';
 import { Navbar } from '../../components/Navbar/Navbar';
 import { Footer } from '../../components/Footer/Footer';
 import { useAuth } from '../../context/AuthContext';
@@ -22,7 +22,7 @@ const QUICK_ACTIONS = [
     title: 'Manage Registrations',
     description: 'Review student sign-ups, confirm attendance, and update registration status.',
     cta: 'View Registrations',
-    href: '/college/registrations', // Adjust to actual route if created later
+    href: '/college/registrations',
     accent: '#B56E4A',
     bg: '#F5E4D9',
   },
@@ -31,9 +31,18 @@ const QUICK_ACTIONS = [
     title: 'Publish Results',
     description: "Record and publish final results for events you've managed.",
     cta: 'Publish Results',
-    href: '/college/results/new', // Adjust to actual route if created later
+    href: '/college/results/new',
     accent: '#C7A86D',
     bg: '#F5F0E4',
+  },
+  {
+    icon: <BarChart3 size={24} />,
+    title: 'Analytics',
+    description: 'View registration statistics and top events for your college.',
+    cta: 'View Analytics',
+    href: '/college/analytics',
+    accent: '#2F5D50',
+    bg: '#DCE8E1',
   },
 ];
 
