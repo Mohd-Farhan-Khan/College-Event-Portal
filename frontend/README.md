@@ -1,16 +1,62 @@
-# React + Vite
+# College Event Portal - Frontend
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+The frontend application for the College Event Portal, built with React and Vite. It provides a responsive, aesthetic, and user-friendly interface for students, college organizers, and administrators.
 
-Currently, two official plugins are available:
+## Tech Stack
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+- **Framework:** React 18
+- **Build Tool:** Vite
+- **Routing:** React Router DOM
+- **Icons:** Lucide React
+- **Styling:** Custom CSS with a centralized design system (`index.css`)
+- **API Communication:** Custom Fetch wrapper (`src/services/api.js`)
 
-## React Compiler
+## Directory Structure
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+```text
+src/
+├── assets/         # Static assets (images, fonts)
+├── components/     # Reusable UI components (Navbar, Footer, etc.)
+├── context/        # React Context providers (AuthContext)
+├── pages/          # Route-level page components (Admin, CollegeDashboard, etc.)
+├── services/       # External service integrations (API calls)
+├── App.jsx         # Main application component and routing configuration
+├── index.css       # Global design tokens and base styles
+└── main.jsx        # Entry point
+```
 
-## Expanding the ESLint configuration
+## Available Scripts
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+In the project directory, you can run:
+
+### `npm run dev`
+
+Runs the app in the development mode.\
+Open [http://localhost:5173](http://localhost:5173) to view it in your browser.
+The page will reload when you make changes.
+
+### `npm run build`
+
+Builds the app for production to the `dist` folder.\
+It correctly bundles React in production mode and optimizes the build for the best performance.
+
+### `npm run preview`
+
+Locally preview the production build.
+
+## API Integration
+
+All API calls are centralized in `src/services/api.js`. This service acts as a wrapper around the native `fetch` API, automatically handling:
+- Attaching the JWT Bearer token to authenticated requests.
+- Standardizing error handling and parsing JSON responses.
+- Constructing query parameters dynamically.
+
+## Design System
+
+The application relies on a robust design system defined in `src/index.css`. This file contains CSS custom properties (variables) for:
+- Colors (Primary, secondary, accents, backgrounds)
+- Typography (Font families, sizes, weights)
+- Spacing, borders, and shadows
+- Common component classes (buttons, form inputs, cards)
+
+When creating new components, always utilize these established variables to maintain visual consistency across the platform.
