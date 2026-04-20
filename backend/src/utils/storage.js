@@ -93,9 +93,45 @@ export const publicFileExists = async (relativePath) => {
   }
 };
 
+/**
+ * Delete a previously stored file from Cloudinary or local storage.
+ * Gracefully no-ops on external URLs, empty values, or missing files.
+ * @param {string|undefined} url - The URL of the stored file
+ */
+export const deleteStoredFile = async (url) => {
+  if (!url) return;
+
+  try {
+    // Cloudinary URL pattern: https://res.cloudinary.com/<cloud>/...
+    if (isCloudinaryConfigured() && /res\.cloudinary\.com/i.test(url)) {
+      // Extract public_id from Cloudinary URL
+      // URL format: https://res.cloudinary.com/<cloud>/image/upload/v123/event-portal/folder/filename.ext
+      const match = url.match(/\/upload\/(?:v\d+\/)?(.+)\.[a-z]+$/i);
+      if (match?.[1]) {
+        await cloudinary.uploader.destroy(match[1], { invalidate: true });
+      }
+      return;
+    }
+
+    // Local file: URL contains our host or starts with /uploads/
+    const localMatch = url.match(/\/(uploads\/.+)$/);
+    if (localMatch?.[1]) {
+      const filePath = resolveLocalPublicPath(localMatch[1]);
+      const exists = await publicFileExists(localMatch[1]);
+      if (exists) {
+        await fs.unlink(filePath);
+      }
+    }
+  } catch (err) {
+    // Log but don't throw — deletion failures shouldn't block the main operation
+    console.warn(`[storage] Failed to delete file at ${url}:`, err.message);
+  }
+};
+
 export default {
   storeBuffer,
   resolveLocalPublicPath,
   publicFileExists,
   isCloudinaryConfigured,
+  deleteStoredFile,
 };

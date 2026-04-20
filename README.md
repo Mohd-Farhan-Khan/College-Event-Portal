@@ -12,10 +12,10 @@ A centralized web-based platform designed to streamline the management of multi-
 ## Features
 
 - **For Students:** Browse college events, register for participation, view personal dashboards, and download certificates of achievement.
-- **For College Organizers:** Publish events, manage event details, view/approve student registrations, and publish event results.
+- **For College Organizers:** Publish events (with poster file upload or URL), manage event details, view/approve student registrations, and publish event results with certificate upload or auto-generation.
 - **For Administrators:** Oversee all colleges and events across the platform, manage college accounts, publish results on behalf of any college, and view comprehensive platform analytics.
-- **Secure File Storage:** Centralized media handling for event posters and college logos, with automatic Cloudinary integration.
-- **Dynamic Certificate Generation:** Automated PDF generation for event certificates directly from the backend.
+- **Secure File Storage:** Centralized media handling for event posters, college logos, and certificates — with automatic Cloudinary integration and local fallback. Orphaned files are automatically cleaned up when events or colleges are deleted.
+- **Dynamic Certificate Generation:** Automated PDF generation for event certificates directly from the backend via the `/api/results/:id/certificate` endpoint, accessible from both the College and Admin Publish Results pages.
 
 ## Architecture & Tech Stack
 

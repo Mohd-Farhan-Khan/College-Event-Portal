@@ -4,11 +4,9 @@ import { ArrowLeft, CheckCircle2, ExternalLink, Building2, Upload, ImageIcon, Li
 import { Navbar } from '../../components/Navbar/Navbar';
 import { Footer } from '../../components/Footer/Footer';
 import { useAuth } from '../../context/AuthContext';
-import { request } from '../../services/api';
+import { request, uploadFile as apiUploadFile } from '../../services/api';
 
 import '../CreateEvent/CreateEvent.css'; // Re-use the shared form CSS
-
-const API_BASE = 'http://localhost:8000';
 
 /**
  * /admin/colleges/new
@@ -58,26 +56,7 @@ export function AdminCollegeCreate() {
     setUploadError('');
 
     try {
-      const token = localStorage.getItem('token');
-      const formData = new FormData();
-      formData.append('file', file);
-      formData.append('kind', 'generic');
-
-      const res = await fetch(`${API_BASE}/api/upload`, {
-        method: 'POST',
-        headers: {
-          ...(token ? { Authorization: `Bearer ${token}` } : {}),
-        },
-        body: formData,
-      });
-
-      if (!res.ok) {
-        let data;
-        try { data = await res.json(); } catch { data = null; }
-        throw new Error(data?.message || `Upload failed (${res.status})`);
-      }
-
-      const data = await res.json();
+      const data = await apiUploadFile(file, 'generic');
       setLogoUrl(data.url);
     } catch (err) {
       console.error('Upload error:', err);

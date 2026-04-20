@@ -118,6 +118,8 @@ Analytics
 - Error handling:
     - Duplicate registrations are handled with a 409 Conflict response
     - Mongoose validation errors return meaningful messages
+- **Orphaned file cleanup:** When events or colleges are deleted, their associated files (poster images, logos) are automatically cleaned up from Cloudinary or local storage. The `deleteStoredFile()` utility in `src/utils/storage.js` handles both storage backends. Cleanup failures are logged but do not block the deletion operation.
+- **Cloudinary integration:** When `.env` variables (`CLOUDINARY_CLOUD_NAME`, `CLOUDINARY_API_KEY`, `CLOUDINARY_API_SECRET`) are set, all file uploads and certificate generation use Cloudinary. When not set, files are stored locally in `public/`.
 
 ## API Documentation Setup
 

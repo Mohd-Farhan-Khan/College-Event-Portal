@@ -24,6 +24,7 @@ import { AdminCollegeEdit } from './pages/Admin/AdminCollegeEdit';
 import { AdminAnalytics } from './pages/Admin/AdminAnalytics';
 import { StudentRegistrations } from './pages/StudentRegistrations/StudentRegistrations';
 import { CollegeAnalytics } from './pages/CollegeAnalytics/CollegeAnalytics';
+import { EditEvent } from './pages/EditEvent/EditEvent';
 
 function App() {
   return (
@@ -42,6 +43,7 @@ function App() {
 
           <Route path="/college/dashboard" element={<CollegeDashboard />} />
           <Route path="/college/events/new" element={<CreateEvent />} />
+          <Route path="/college/events/:eventId/edit" element={<EditEvent />} />
           <Route path="/college/registrations" element={<ManageRegistrations />} />
           <Route path="/college/results/new" element={<PublishResults />} />
 
@@ -49,6 +51,7 @@ function App() {
           <Route path="/admin/users" element={<AdminUsersList />} />
           <Route path="/admin/users/:id" element={<AdminUserDetail />} />
           <Route path="/admin/events/new" element={<AdminCreateEvent />} />
+          <Route path="/admin/events/:eventId/edit" element={<EditEvent />} />
           <Route path="/admin/registrations" element={<AdminRegistrations />} />
           <Route path="/admin/results/new" element={<AdminPublishResults />} />
           <Route path="/admin/colleges" element={<AdminCollegesList />} />

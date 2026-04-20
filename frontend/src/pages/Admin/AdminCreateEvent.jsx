@@ -1,10 +1,10 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { ImageIcon, CheckCircle2, ChevronDown, ExternalLink, Info } from 'lucide-react';
+import { ImageIcon, CheckCircle2, ChevronDown, ExternalLink, Info, Upload, Link2, Loader2 } from 'lucide-react';
 import { Navbar } from '../../components/Navbar/Navbar';
 import { Footer } from '../../components/Footer/Footer';
 import { useAuth } from '../../context/AuthContext';
-import { request } from '../../services/api';
+import { request, uploadFile } from '../../services/api';
 
 import '../CreateEvent/CreateEvent.css'; // Re-use event form CSS
 
@@ -21,6 +21,12 @@ export function AdminCreateEvent() {
   const [venue, setVenue] = useState("");
   const [posterUrl, setPosterUrl] = useState("");
   const [collegeId, setCollegeId] = useState("");
+
+  // Upload state
+  const [showUrlInput, setShowUrlInput] = useState(false);
+  const [isUploading, setIsUploading] = useState(false);
+  const [uploadError, setUploadError] = useState("");
+  const fileInputRef = useRef(null);
   
   const [submittedEventId, setSubmittedEventId] = useState("");
   const [error, setError] = useState("");
@@ -40,6 +46,26 @@ export function AdminCreateEvent() {
 
   const isValid = title.trim() && date.trim();
 
+  // File upload handler
+  const handleFileUpload = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setIsUploading(true);
+    setUploadError("");
+
+    try {
+      const data = await uploadFile(file, 'poster');
+      setPosterUrl(data.url);
+    } catch (err) {
+      console.error('Upload error:', err);
+      setUploadError(err.message || 'Failed to upload file.');
+    } finally {
+      setIsUploading(false);
+      if (fileInputRef.current) fileInputRef.current.value = '';
+    }
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!isValid) return;
@@ -51,7 +77,8 @@ export function AdminCreateEvent() {
     try {
       const payload = {
         title: title.trim(),
-        date: date.trim(),
+        // Standardize date to prevent timezone shift
+        date: date.trim() + "T00:00:00",
         description: description.trim() || undefined,
         category: category || undefined,
         venue: venue.trim() || undefined,
@@ -207,29 +234,91 @@ export function AdminCreateEvent() {
                 </div>
               </div>
 
+              {/* Poster — Upload or URL */}
               <div className="form-group">
-                <label htmlFor="posterUrl" className="form-label">Poster URL</label>
-                <input
-                  id="posterUrl"
-                  value={posterUrl}
-                  onChange={(e) => setPosterUrl(e.target.value)}
-                  placeholder="https://..."
-                  className="form-input"
-                />
-                
-                <div className="form-poster-preview">
-                  {posterUrl ? (
-                    <img src={posterUrl} alt="Preview" className="form-poster-img" onError={(e) => (e.currentTarget.style.display = "none")} />
-                  ) : (
-                    <div className="form-poster-empty">
-                      <ImageIcon size={24} />
-                      <p>Poster preview</p>
-                    </div>
-                  )}
+                <div className="form-upload-header">
+                  <label className="form-label" style={{ marginBottom: 0 }}>Event Poster</label>
+                  <button
+                    type="button"
+                    onClick={() => setShowUrlInput(!showUrlInput)}
+                    className="form-upload-toggle"
+                  >
+                    <Link2 size={12} /> {showUrlInput ? 'Upload file' : 'Or paste URL'}
+                  </button>
                 </div>
-                <p style={{ fontSize: '0.75rem', color: 'var(--cep-text-secondary)', marginTop: '0.5rem' }}>
-                  Image upload is not supported. Provide a publicly accessible image URL.
-                </p>
+
+                {showUrlInput ? (
+                  <>
+                    <input
+                      id="posterUrl"
+                      value={posterUrl}
+                      onChange={(e) => setPosterUrl(e.target.value)}
+                      placeholder="https://..."
+                      className="form-input"
+                    />
+                    <div className="poster-preview">
+                      {posterUrl ? (
+                        <img src={posterUrl} alt="Preview" className="poster-preview__img" onError={(e) => (e.currentTarget.style.display = "none")} />
+                      ) : (
+                        <div className="poster-preview__empty">
+                          <ImageIcon size={24} />
+                          <p>Poster preview</p>
+                        </div>
+                      )}
+                    </div>
+                  </>
+                ) : (
+                  <>
+                    <input
+                      type="file"
+                      accept="image/jpeg,image/png,image/webp,image/gif"
+                      ref={fileInputRef}
+                      onChange={handleFileUpload}
+                      style={{ display: 'none' }}
+                      id="admin-poster-file-input"
+                    />
+
+                    {posterUrl ? (
+                      <div className="form-upload-preview">
+                        <img src={posterUrl} alt="Poster preview" className="form-upload-preview__img" onError={e => { e.currentTarget.style.display = 'none'; }} />
+                        <button
+                          type="button"
+                          onClick={() => setPosterUrl('')}
+                          className="form-upload-preview__remove"
+                          aria-label="Remove poster"
+                        >
+                          &times;
+                        </button>
+                      </div>
+                    ) : (
+                      <button
+                        type="button"
+                        onClick={() => fileInputRef.current?.click()}
+                        disabled={isUploading}
+                        className={`form-upload-zone ${isUploading ? 'form-upload-zone--uploading' : ''}`}
+                      >
+                        {isUploading ? (
+                          <>
+                            <Loader2 size={24} className="icon-spin" style={{ color: 'var(--cep-primary)' }} />
+                            <span className="form-upload-zone__text">Uploading...</span>
+                          </>
+                        ) : (
+                          <>
+                            <div className="form-upload-zone__icon">
+                              <Upload size={16} color="var(--cep-primary)" />
+                            </div>
+                            <span className="form-upload-zone__text">Click to upload poster</span>
+                            <span className="form-upload-zone__hint">JPEG, PNG, WebP or GIF — max 5 MB</span>
+                          </>
+                        )}
+                      </button>
+                    )}
+                  </>
+                )}
+
+                {uploadError && (
+                  <p className="form-upload-error">{uploadError}</p>
+                )}
               </div>
             </div>
 

@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import {
   Calendar, MapPin, Clock, Share2, Heart,
-  Users, ExternalLink, ArrowLeft,
+  Users, ExternalLink, ArrowLeft, Edit, Trash2
 } from 'lucide-react';
 import { Navbar } from '../../components/Navbar/Navbar';
 import { Footer } from '../../components/Footer/Footer';
@@ -65,6 +65,10 @@ export function EventDetail() {
   const [regState, setRegState] = useState('idle'); // idle | loading | registered | error | already
   const [regError, setRegError] = useState('');
 
+  const [showDelete, setShowDelete] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [deleteError, setDeleteError] = useState('');
+
   /* Fetch the event */
   useEffect(() => {
     let cancelled = false;
@@ -107,11 +111,22 @@ export function EventDetail() {
       addRegistration(eventId);
     } catch (err) {
       if (err.status === 409) {
+        // Duplicate registration — show as "already registered"
         setRegState('already');
         addRegistration(eventId);
+      } else if (err.status === 404) {
+        setRegState('error');
+        setRegError('This event was not found. It may have been removed.');
+      } else if (err.status === 401) {
+        setRegState('error');
+        setRegError('Your session has expired. Please log in again.');
+      } else if (err.status === 403) {
+        setRegState('error');
+        setRegError(err.data?.message || 'You do not have permission to register for this event.');
       } else {
         setRegState('error');
-        setRegError(err.message || 'Registration failed.');
+        // Surface the backend's specific message instead of generic "Request failed (xxx)"
+        setRegError(err.data?.message || err.message || 'Registration failed. Please try again.');
       }
     }
   }
@@ -120,6 +135,24 @@ export function EventDetail() {
   const orgName =
     event?.college_id?.name || event?.createdBy?.name || 'EventHub';
   const orgInitials = getInitials(orgName);
+
+  /* Permissions */
+  const isOwner = user?.role === 'college' && user.college_id === event?.college_id?._id;
+  const isAdmin = user?.role === 'admin';
+  const canManage = isOwner || isAdmin;
+
+  /* Delete Handler */
+  async function handleDeleteEvent() {
+    setIsDeleting(true);
+    setDeleteError('');
+    try {
+      await request(`/api/events/${eventId}`, { method: 'DELETE' });
+      navigate(isAdmin ? '/admin/dashboard' : '/college/dashboard');
+    } catch (err) {
+      setDeleteError(err.message || 'Failed to delete event.');
+      setIsDeleting(false);
+    }
+  }
 
   /* ── Loading skeleton ── */
   if (isLoading) {
@@ -175,6 +208,25 @@ export function EventDetail() {
             <ArrowLeft size={16} className="detail-back-link__icon" />
             Back to Events
           </Link>
+          
+          {canManage && (
+            <div className="detail-manage-actions" style={{ display: 'flex', gap: '1rem', marginLeft: 'auto' }}>
+              <Link 
+                to={isAdmin ? `/admin/events/${eventId}/edit` : `/college/events/${eventId}/edit`} 
+                className="btn btn--outline" 
+                style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '0.5rem 1rem', borderColor: '#DCE8E1', color: '#2F5D50' }}
+              >
+                <Edit size={14} /> Edit Event
+              </Link>
+              <button 
+                className="btn btn--outline" 
+                onClick={() => setShowDelete(true)}
+                style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '0.5rem 1rem', borderColor: '#F5E4D9', color: '#B56E4A' }}
+              >
+                <Trash2 size={14} /> Delete
+              </button>
+            </div>
+          )}
         </div>
       </div>
 
@@ -366,6 +418,35 @@ export function EventDetail() {
           </div>
         </div>
       </main>
+
+      {/* Delete Confirmation Modal */}
+      {showDelete && (
+        <div className="confirm-dialog-overlay">
+          <div className="confirm-dialog">
+            <h3 className="confirm-dialog__title font-serif">Delete Event?</h3>
+            <p className="confirm-dialog__desc">
+              Are you sure you want to delete <strong>{event.title}</strong>? This action cannot be undone and will permanently remove all registrations, results, and associated files.
+            </p>
+            {deleteError && <p style={{ color: '#B56E4A', marginTop: '0.5rem', fontWeight: 500 }}>{deleteError}</p>}
+            <div className="confirm-dialog__actions">
+              <button 
+                className="confirm-dialog__cancel" 
+                onClick={() => { setShowDelete(false); setDeleteError(''); }}
+                disabled={isDeleting}
+              >
+                Cancel
+              </button>
+              <button 
+                className="confirm-dialog__delete" 
+                onClick={handleDeleteEvent}
+                disabled={isDeleting}
+              >
+                {isDeleting ? 'Deleting...' : 'Delete Event'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       <Footer />
     </div>

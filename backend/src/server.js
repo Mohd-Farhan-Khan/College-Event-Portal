@@ -1,10 +1,8 @@
-import dotenv from "dotenv";
+import "dotenv/config";
 import app from "./app.js";
 import connectDB from "./config/db.js";
 // Ensure Mongoose models are registered early
 import "./models/index.js";
-
-dotenv.config();
 
 const PORT = process.env.PORT || 8000;
 

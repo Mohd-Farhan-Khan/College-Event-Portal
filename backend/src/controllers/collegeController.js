@@ -3,6 +3,7 @@ import Event from "../models/eventModel.js";
 import User from "../models/userModel.js";
 import Registration from "../models/registrationModel.js";
 import Result from "../models/resultModel.js";
+import { deleteStoredFile } from "../utils/storage.js";
 
 export const getColleges = async (req, res, next) => {
   try {
@@ -64,8 +65,15 @@ export const deleteCollege = async (req, res, next) => {
     const college = await College.findById(req.params.id);
     if (!college) return res.status(404).json({ message: "College not found" });
 
-    const events = await Event.find({ college_id: college._id }).select("_id");
+    // Clean up orphaned files: college logo + all event posters
+    const events = await Event.find({ college_id: college._id }).select("_id poster_url");
     const eventIds = events.map((event) => event._id);
+
+    // Delete stored files (logo + posters) — fire-and-forget, don't block on failures
+    await Promise.allSettled([
+      deleteStoredFile(college.logo_url),
+      ...events.map((event) => deleteStoredFile(event.poster_url)),
+    ]);
 
     await Promise.all([
       Registration.deleteMany({ event_id: { $in: eventIds } }),

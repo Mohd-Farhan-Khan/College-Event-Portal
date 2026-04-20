@@ -166,9 +166,56 @@ export function getCollegeAnalytics() {
 /* ───── Upload ───── */
 
 /**
- * POST /api/upload  (multipart/form-data — handled outside the JSON wrapper)
- * Use the raw fetch for file uploads; see AdminCollegeCreate for usage.
+ * POST /api/upload  (multipart/form-data)
+ * Uploads a file to the backend (Cloudinary or local storage).
+ *
+ * @param {File}   file  – the File object from an <input type="file">
+ * @param {string} kind  – 'poster' | 'certificate' | 'generic'
+ * @returns {Promise<{ url: string, publicId: string, filename: string, mimeType: string, size: number, storage: string }>}
  */
+export async function uploadFile(file, kind = 'generic') {
+  const token = localStorage.getItem('token');
+  const formData = new FormData();
+  formData.append('file', file);
+  formData.append('kind', kind);
+
+  const res = await fetch(`${API_BASE}/api/upload`, {
+    method: 'POST',
+    headers: {
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
+    },
+    body: formData,
+  });
+
+  let data;
+  try {
+    data = await res.json();
+  } catch {
+    data = null;
+  }
+
+  if (!res.ok) {
+    const error = new Error(data?.message || `Upload failed (${res.status})`);
+    error.status = res.status;
+    error.data = data;
+    throw error;
+  }
+
+  return data;
+}
+
+/* ───── Certificate Generation ───── */
+
+/**
+ * POST /api/results/:id/certificate
+ * Triggers backend-side PDF certificate generation for a published result.
+ *
+ * @param {string} resultId – the Result document _id
+ * @returns {Promise<object>} – the updated result with certificate_url
+ */
+export function generateCertificate(resultId) {
+  return request(`/api/results/${resultId}/certificate`, { method: 'POST' });
+}
 
 /* ───── Generic export for future use ───── */
 export { request };

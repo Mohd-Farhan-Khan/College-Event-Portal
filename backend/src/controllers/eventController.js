@@ -1,6 +1,7 @@
 import Event from "../models/eventModel.js";
 import Registration from "../models/registrationModel.js";
 import Result from "../models/resultModel.js";
+import { deleteStoredFile } from "../utils/storage.js";
 
 const getRefId = (value) => value?._id?.toString() || value?.toString?.();
 
@@ -98,6 +99,9 @@ export const deleteEvent = async (req, res, next) => {
     if (!canManageEvent(event, req.user)) {
       return res.status(403).json({ message: "Forbidden: event access denied" });
     }
+
+    // Clean up orphaned poster file from storage
+    await deleteStoredFile(event.poster_url);
 
     await Promise.all([
       Registration.deleteMany({ event_id: event._id }),

@@ -1,24 +1,27 @@
 import { useState, useEffect, useRef } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { ImageIcon, CheckCircle2, ChevronDown, Upload, Link2, Loader2 } from 'lucide-react';
+import { useNavigate, useParams, Link } from 'react-router-dom';
+import { ImageIcon, ChevronDown, Upload, Link2, Loader2, ArrowLeft, Info } from 'lucide-react';
 import { Navbar } from '../../components/Navbar/Navbar';
 import { Footer } from '../../components/Footer/Footer';
 import { useAuth } from '../../context/AuthContext';
-import { request, uploadFile } from '../../services/api';
-import './CreateEvent.css';
+import { request, uploadFile, getEvent } from '../../services/api';
+import '../CreateEvent/CreateEvent.css';
 
 const CATEGORIES = ["Tech", "Cultural", "Sports", "Academic", "Workshop", "Other"];
 
-export function CreateEvent() {
+export function EditEvent() {
+  const { eventId } = useParams();
   const { user, isLoading: isAuthLoading } = useAuth();
   const navigate = useNavigate();
 
+  const [isLoading, setIsLoading] = useState(true);
   const [title, setTitle] = useState("");
   const [date, setDate] = useState("");
   const [description, setDescription] = useState("");
   const [category, setCategory] = useState("");
   const [venue, setVenue] = useState("");
   const [posterUrl, setPosterUrl] = useState("");
+  const [collegeId, setCollegeId] = useState(""); // Only used by admins
   
   // Upload state
   const [showUrlInput, setShowUrlInput] = useState(false);
@@ -26,23 +29,60 @@ export function CreateEvent() {
   const [uploadError, setUploadError] = useState("");
   const fileInputRef = useRef(null);
 
-  const [submitted, setSubmitted] = useState(false);
   const [error, setError] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // Security check: Must be college or admin to create events
+  // Security & data fetching
   useEffect(() => {
     if (isAuthLoading) return;
 
     if (!user) {
       navigate('/login');
-    } else if (user.role !== 'college' && user.role !== 'admin') {
-      navigate('/events');
+      return;
     }
-  }, [user, isAuthLoading, navigate]);
+    if (user.role !== 'college' && user.role !== 'admin') {
+      navigate('/events');
+      return;
+    }
+
+    async function fetchEvent() {
+      try {
+        const data = await getEvent(eventId);
+        
+        // Ensure user can edit
+        const isOwner = user.role === 'college' && user.college_id === data.college_id?._id;
+        const isAdmin = user.role === 'admin';
+        
+        if (!isOwner && !isAdmin) {
+          navigate('/events');
+          return;
+        }
+
+        setTitle(data.title || "");
+        if (data.date) {
+          setDate(data.date.split('T')[0]); // Extact YYYY-MM-DD
+        }
+        setDescription(data.description || "");
+        setCategory(data.category || "");
+        setVenue(data.venue || "");
+        setPosterUrl(data.poster_url || "");
+        if (isAdmin && data.college_id) {
+          setCollegeId(data.college_id._id);
+        }
+        
+      } catch (err) {
+        setError("Failed to load event details. It may have been removed.");
+      } finally {
+        setIsLoading(false);
+      }
+    }
+
+    fetchEvent();
+  }, [eventId, user, isAuthLoading, navigate]);
 
   if (isAuthLoading || !user || (user.role !== 'college' && user.role !== 'admin')) return null;
 
+  const isAdmin = user.role === 'admin';
   const hasRequiredFields = title.trim() && date.trim();
 
   // File upload handler
@@ -71,39 +111,51 @@ export function CreateEvent() {
 
     setIsSubmitting(true);
     setError("");
-    setSubmitted(false);
 
     try {
       const payload = {
         title: title.trim(),
-        // Fix: send date as noon-local to prevent timezone shift
         date: date + "T00:00:00",
+        description: description.trim() || undefined,
+        category: category || undefined,
+        venue: venue.trim() || undefined,
+        poster_url: posterUrl.trim() || undefined,
       };
       
-      if (description.trim()) payload.description = description.trim();
-      if (category) payload.category = category;
-      if (venue.trim()) payload.venue = venue.trim();
-      if (posterUrl.trim()) payload.poster_url = posterUrl.trim();
+      if (isAdmin && collegeId.trim()) {
+        payload.college = collegeId.trim();
+      } else if (isAdmin && !collegeId.trim()) {
+        // If admin clears college, how to send? Depends on backend. Let's just omit it or send null.
+        // We'll just omit it, though removing existing college might require an explicit null.
+      }
 
-      await request('/api/events', {
-        method: 'POST',
+      await request(`/api/events/${eventId}`, {
+        method: 'PUT',
         body: payload
       });
 
-      setSubmitted(true);
-      setTitle("");
-      setDate("");
-      setDescription("");
-      setCategory("");
-      setVenue("");
-      setPosterUrl("");
+      navigate(`/events/${eventId}`);
       
     } catch (err) {
       console.error(err);
-      setError(err.message || 'Failed to create event. Please try again.');
+      setError(err.message || 'Failed to update event. Please try again.');
     } finally {
       setIsSubmitting(false);
     }
+  }
+
+  if (isLoading) {
+    return (
+      <div className="create-event-page">
+        <Navbar />
+        <main className="create-event-main">
+          <div className="create-event-container" style={{ display: 'flex', justifyContent: 'center', padding: '4rem' }}>
+            <Loader2 size={32} className="icon-spin" color="var(--cep-primary)" />
+          </div>
+        </main>
+        <Footer />
+      </div>
+    );
   }
 
   return (
@@ -113,27 +165,17 @@ export function CreateEvent() {
       <main className="create-event-main">
         <div className="create-event-container">
           
+          {/* Back Navigation */}
+          <Link to={`/events/${eventId}`} className="btn btn--outline" style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem', marginBottom: '1.5rem', border: 'none', padding: '0', color: '#6B6B6B' }}>
+            <ArrowLeft size={16} /> Back to Event
+          </Link>
+          
           {/* Header */}
           <div className="create-event-header">
-            <p className="create-event-header__eyebrow">College Organizer</p>
-            <h1 className="create-event-header__title font-serif">Create Event</h1>
-            <p className="create-event-header__desc">Publish a new event for your college community.</p>
+            <p className="create-event-header__eyebrow">{isAdmin ? 'Administration' : 'College Organizer'}</p>
+            <h1 className="create-event-header__title font-serif">Edit Event</h1>
+            <p className="create-event-header__desc">Update details for {title || 'this event'}.</p>
           </div>
-
-          {/* Success Banner */}
-          {submitted && (
-            <div className="success-banner">
-              <CheckCircle2 size={20} color="#2F5D50" />
-              <p className="success-banner__text">Event created successfully! It will appear in the event listing shortly.</p>
-              <button 
-                onClick={() => setSubmitted(false)} 
-                className="success-banner__close"
-                aria-label="Dismiss"
-              >
-                &times;
-              </button>
-            </div>
-          )}
 
           {error && (
             <div className="create-error mb-6">
@@ -149,7 +191,6 @@ export function CreateEvent() {
                 <div className="form-section__line form-section__line--required" />
               </div>
 
-              {/* Title */}
               <div className="form-group">
                 <label htmlFor="title" className="form-label">
                   Event Title <span className="form-label__asterisk">*</span>
@@ -158,14 +199,11 @@ export function CreateEvent() {
                   id="title"
                   value={title}
                   onChange={(e) => setTitle(e.target.value)}
-                  placeholder="e.g. HackTheFuture '25 — 48-Hour Hackathon"
                   className="form-input"
                   required
                 />
-                {!title && <p className="form-error-text">Title is required</p>}
               </div>
 
-              {/* Date */}
               <div className="form-group">
                 <label htmlFor="date" className="form-label">
                   Event Date <span className="form-label__asterisk">*</span>
@@ -178,7 +216,6 @@ export function CreateEvent() {
                   className="form-input"
                   required
                 />
-                {!date && <p className="form-error-text">Date is required</p>}
               </div>
             </div>
 
@@ -189,51 +226,46 @@ export function CreateEvent() {
                 <div className="form-section__line" />
               </div>
 
-              {/* Description */}
               <div className="form-group">
                 <label htmlFor="description" className="form-label">Description</label>
                 <textarea
                   id="description"
                   value={description}
                   onChange={(e) => setDescription(e.target.value)}
-                  placeholder="Give students a clear sense of what to expect — schedule, format, prizes, who should attend..."
                   rows={4}
                   className="form-textarea"
                 />
               </div>
 
-              {/* Category */}
-              <div className="form-group">
-                <label htmlFor="category" className="form-label">Category</label>
-                <div className="form-select-wrap">
-                  <select
-                    id="category"
-                    value={category}
-                    onChange={(e) => setCategory(e.target.value)}
-                    className="form-select"
-                  >
-                    <option value="">Select a category</option>
-                    {CATEGORIES.map((c) => (
-                      <option key={c} value={c}>{c}</option>
-                    ))}
-                  </select>
-                  <ChevronDown size={16} className="form-select-icon" />
+              <div className="form-row">
+                <div className="form-group" style={{ flex: 1 }}>
+                  <label htmlFor="category" className="form-label">Category</label>
+                  <div className="form-select-wrap">
+                    <select
+                      id="category"
+                      value={category}
+                      onChange={(e) => setCategory(e.target.value)}
+                      className="form-select"
+                    >
+                      <option value="">Select category</option>
+                      {CATEGORIES.map(c => <option key={c} value={c}>{c}</option>)}
+                    </select>
+                    <ChevronDown size={16} className="form-select-icon" />
+                  </div>
+                </div>
+
+                <div className="form-group" style={{ flex: 1 }}>
+                  <label htmlFor="venue" className="form-label">Venue</label>
+                  <input
+                    id="venue"
+                    value={venue}
+                    onChange={(e) => setVenue(e.target.value)}
+                    className="form-input"
+                  />
                 </div>
               </div>
 
-              {/* Venue */}
-              <div className="form-group">
-                <label htmlFor="venue" className="form-label">Venue</label>
-                <input
-                  id="venue"
-                  value={venue}
-                  onChange={(e) => setVenue(e.target.value)}
-                  placeholder="e.g. Main Auditorium, MIT Pune"
-                  className="form-input"
-                />
-              </div>
-
-              {/* Poster — Upload or URL */}
+              {/* Poster Upload */}
               <div className="form-group">
                 <div className="form-upload-header">
                   <label className="form-label" style={{ marginBottom: 0 }}>Event Poster</label>
@@ -255,19 +287,13 @@ export function CreateEvent() {
                       placeholder="https://..."
                       className="form-input"
                     />
-                    {/* URL Poster Preview */}
                     <div className="poster-preview">
                       {posterUrl ? (
-                        <img
-                          src={posterUrl}
-                          alt="Poster preview"
-                          className="poster-preview__img"
-                          onError={(e) => (e.currentTarget.style.display = "none")}
-                        />
+                        <img src={posterUrl} alt="Preview" className="poster-preview__img" onError={(e) => (e.currentTarget.style.display = "none")} />
                       ) : (
                         <div className="poster-preview__empty">
-                          <ImageIcon size={32} />
-                          <p className="poster-preview__text">Poster preview will appear here</p>
+                          <ImageIcon size={24} />
+                          <p>Poster preview</p>
                         </div>
                       )}
                     </div>
@@ -320,12 +346,38 @@ export function CreateEvent() {
                     )}
                   </>
                 )}
-
-                {uploadError && (
-                  <p className="form-upload-error">{uploadError}</p>
-                )}
+                {uploadError && <p className="form-upload-error">{uploadError}</p>}
               </div>
             </div>
+
+            {/* Admin College ID */}
+            {isAdmin && (
+              <div className="form-section">
+                <div className="form-section__header">
+                  <span className="form-section__label">College Association</span>
+                  <div className="form-section__line" />
+                </div>
+
+                <div style={{ display: 'flex', gap: '0.625rem', backgroundColor: '#F5F0E4', border: '1px solid #E8D9B8', borderRadius: '0.75rem', padding: '0.875rem', marginBottom: '1.25rem' }}>
+                  <Info size={16} color="#C7A86D" style={{ marginTop: '0.125rem', flexShrink: 0 }} />
+                  <p style={{ fontSize: '0.75rem', color: '#9A7B3F', lineHeight: 1.6 }}>
+                    Optional: enter a known college ID if this event should be associated with a specific college.
+                  </p>
+                </div>
+
+                <div className="form-group">
+                  <label htmlFor="collegeId" className="form-label">College ID</label>
+                  <input
+                    id="collegeId"
+                    value={collegeId}
+                    onChange={(e) => setCollegeId(e.target.value)}
+                    placeholder="clg_..."
+                    className="form-input"
+                    style={{ fontFamily: 'monospace', fontSize: '0.875rem' }}
+                  />
+                </div>
+              </div>
+            )}
 
             {/* Submit */}
             <div>
@@ -334,11 +386,8 @@ export function CreateEvent() {
                 disabled={!hasRequiredFields || isSubmitting}
                 className="btn btn--primary form-submit-btn"
               >
-                {isSubmitting ? 'Creating Event...' : 'Create Event'}
+                {isSubmitting ? 'Saving Changes...' : 'Save Changes'}
               </button>
-              <p className="form-submit-hint">
-                Your college ID will be attached automatically from your account.
-              </p>
             </div>
 
           </form>

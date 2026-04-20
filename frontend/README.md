@@ -51,6 +51,14 @@ All API calls are centralized in `src/services/api.js`. This service acts as a w
 - Standardizing error handling and parsing JSON responses.
 - Constructing query parameters dynamically.
 
+### Key API Helpers
+
+| Function | Description |
+|----------|-------------|
+| `uploadFile(file, kind)` | Uploads a file via `POST /api/upload` (multipart/form-data). Accepts a `File` object and a `kind` string (`'poster'`, `'certificate'`, or `'generic'`). Returns `{ url, publicId, filename, mimeType, size, storage }`. |
+| `generateCertificate(resultId)` | Triggers backend PDF certificate generation via `POST /api/results/:id/certificate`. Returns the updated result object with `certificate_url`. |
+| `request(endpoint, options)` | Generic JSON fetch wrapper. All other helpers (`login`, `register`, `getEvents`, etc.) are built on top of this. |
+
 ## Design System
 
 The application relies on a robust design system defined in `src/index.css`. This file contains CSS custom properties (variables) for:
@@ -60,3 +68,4 @@ The application relies on a robust design system defined in `src/index.css`. Thi
 - Common component classes (buttons, form inputs, cards)
 
 When creating new components, always utilize these established variables to maintain visual consistency across the platform.
+
